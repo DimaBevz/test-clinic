@@ -1,0 +1,25 @@
+.AppointmentListFilters {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+
+  &__filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  &__select-label {
+    color: #808086;
+    font-size: 14px !important;
+    font-weight: 400;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+}

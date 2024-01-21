@@ -1,0 +1,17 @@
+.Comments {
+  &__title {
+    color: #949494;
+    padding-top: 0.5rem;
+  }
+}
+
+.Comment {
+  padding: 0px 10px;
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-direction: row;
+  }
+}

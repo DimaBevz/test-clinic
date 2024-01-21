@@ -1,0 +1,33 @@
+.AppointmentForm {
+  &__doctor-info {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  &__doctor-name {
+    color: #808086 !important;
+    font-weight: 500;
+    font-size: 20px;
+  }
+
+  &__text {
+    color: #808086 !important;
+    font-weight: 400;
+    font-size: 14px;
+  }
+
+  &__pain-scale {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+}
+
+.chakra-accordion__item {
+  border-top-width: 0px !important;
+  border-bottom-width: 1px;
+}

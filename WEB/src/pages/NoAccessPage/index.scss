@@ -1,0 +1,25 @@
+.Container {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  &__LockIconBlock {
+    text-align: center;
+    color: rgb(163, 163, 163);
+  }
+
+  &__LockIcon {
+    height: 30px !important;
+    width: 30px !important;
+  }
+
+  &__Description {
+    color: rgb(163, 163, 163);
+    font-weight: bold;
+    text-align: center;
+    font-size: 17px;
+  }
+}
+
+

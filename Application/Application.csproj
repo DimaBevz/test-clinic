@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Amazon.Extensions.CognitoAuthentication" Version="2.5.2" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.300.20" />
+    <PackageReference Include="Mediator.Abstractions" Version="3.0.0-preview.11" />
+    <PackageReference Include="Mediator.SourceGenerator" Version="3.0.0-preview.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Riok.Mapperly" Version="3.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Session\Queries\" />
+    <Folder Include="User\Queries\" />
+  </ItemGroup>
+  
+
+
+</Project>

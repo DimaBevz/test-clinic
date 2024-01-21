@@ -1,0 +1,27 @@
+.LanguageMenu {
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-family: Overpass, sans-serif;
+    font-style: normal;
+    &__menu-button {
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        color: #000 !important;
+    }
+
+    &__menu-item {
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        color: #000 !important;
+    }
+}

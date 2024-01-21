@@ -1,0 +1,45 @@
+.Header {
+    width: 100%;
+    font-family: "Overpass", sans-serif;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #336099;
+    background-color: #D69E2E;
+    justify-content: space-between;
+    padding: 15px 22px;
+
+    &__menu-button {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        color: #000 !important;
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+    &__menu-item {
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        color: #000 !important;
+        font-size: 16px;
+        a:link {
+            text-decoration: none;
+        }
+        a:visited {
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: none;
+        }
+        a:active {
+            text-decoration: none;
+        }
+    }
+}

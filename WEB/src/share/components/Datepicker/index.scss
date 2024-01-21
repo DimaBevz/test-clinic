@@ -1,0 +1,43 @@
+.react-datepicker {
+  border: 1px solid #D69E2E;
+  border-radius: 0.375rem;
+
+  &__header {
+    background-color: #D69E2E;
+  }
+
+  &__day--selected {
+    background-color: #D69E2E;
+
+    &:hover {
+      background-color: #D69E2E;
+    }
+  }
+
+  &__navigation-icon {
+    &:before {
+      border-color: #000;
+    }
+  }
+}
+
+.react-datepicker__triangle {
+  display: none;
+}
+
+.DatePicker {
+  &__label {
+    color: #fff;
+    font-size: 14px !important;
+    font-weight: 400;
+    line-height: 150%;
+  }
+
+  &__input {
+    border-color: #D69E2E !important;
+  }
+
+  &__icon {
+   cursor: not-allowed;
+  }
+}

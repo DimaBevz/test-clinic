@@ -1,0 +1,15 @@
+.Documents {
+    &__deleteButton {
+        .button {
+
+            &:hover {
+                background: transparent;
+            }
+
+            // Pressed state
+            &:active {
+                opacity: 0.8;
+            }
+        }
+    }
+}

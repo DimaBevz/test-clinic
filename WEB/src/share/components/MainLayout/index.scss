@@ -1,0 +1,11 @@
+.MainLayout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-image: url("../../assets/img/young-doctor-blured20.jpg");
+    background-size: cover;
+    &__content {
+        height: 100%;
+        display: flex;
+    }
+}
