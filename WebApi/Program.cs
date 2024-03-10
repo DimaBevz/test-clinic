@@ -7,6 +7,9 @@ using WebApi.Hubs;
 const string corsPolicy = "corsPolicy";
 
 var builder = WebApplication.CreateBuilder(args);
+builder
+    .Configuration
+    .AddEnvironmentVariables("AWS");
 builder.Services
     .RegisterInfrastructureServices(builder.Configuration)
     .RegisterPersistenceServices(builder.Configuration)

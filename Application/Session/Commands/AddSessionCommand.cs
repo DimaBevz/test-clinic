@@ -32,14 +32,17 @@ namespace Application.Session.Commands
             {
                 throw new ApplicationException(ExceptionRoleMessage);
             }
+
             var patientId = new Guid(_currentUserService.UserId);
             var meetingString =
                 await _callService.CreateMeeting(
                     command.Dto.SessionDate.ToDateTime(TimeOnly.FromDateTime(command.Dto.StartTime)));
+
             if (!Guid.TryParse(meetingString, out var meetingId))
             {
                 throw new ApplicationException(ExceptionGuidMessage);
             }
+
             var result = await _sessionRepository.AddSessionAsync(command.Dto, patientId, meetingId, cancellationToken);
 
             if (result == null)

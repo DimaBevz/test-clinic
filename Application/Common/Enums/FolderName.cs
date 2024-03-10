@@ -3,6 +3,7 @@
     public enum FolderName
     {
         ProfilePhotos,
-        Documents
+        Documents,
+        BugPhotos
     }
 }

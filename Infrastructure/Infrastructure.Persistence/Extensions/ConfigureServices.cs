@@ -22,7 +22,10 @@ public static class ConfigureServices
         services.AddScoped<ITimetableRepository, TimetableRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IPositionRepository, PositionRepository>();
+        services.AddScoped<IMilitaryDataRepository, MilitaryDataRepository>();
         services.AddScoped<ITestRepository, TestRepository>();
+        services.AddScoped<IMeetingHistoryRepository, MeetingHistoryRepository>();
+        services.AddScoped<IBugReportRepository, BugReportRepository>();
 
         return services;
     }

@@ -8,7 +8,7 @@ namespace Application.Common.Interfaces.Repositories
         Task<AddTimetableTemplateDto> CreateTemplateAsync(AddTimetableTemplateDto request, CancellationToken cancellationToken);
         Task<AddTimetableTemplateDto> CreateDefaultTemplateAsync(Guid physicianId, CancellationToken cancellationToken);
         Task<GetTimetablesDto?> GetTimetablesAsync(GetTimetableTemplateDto request, CancellationToken cancellationToken);
-        Task<GetAvailableTimetableDto> GetAvailableTimetableAsync(Guid physicianId, CancellationToken cancellationToken);
+        Task<GetAvailableTimetableDto?> GetAvailableTimetableAsync(Guid physicianId, CancellationToken cancellationToken);
         Task<UpdateTimetableTemplateDto> UpdateTemplateAsync(UpdateTimetableTemplateDto request, CancellationToken cancellationToken);
         Task<bool> DeleteTemplateAsync(Guid physicianId, CancellationToken cancellationToken);
     }

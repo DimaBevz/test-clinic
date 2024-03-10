@@ -49,7 +49,7 @@ const LanguageSelector = () => {
         <MenuDivider />
         <MenuItem
           onClick={handleChangeLanguage as any}
-          value="uk"
+          value="uk-UA"
           className="LanguageMenu__menu-item"
         >
           Українська

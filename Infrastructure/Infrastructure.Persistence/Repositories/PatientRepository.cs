@@ -28,7 +28,10 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<GetPatientDataDto> GetPatientDataAsync(Guid id)
         {
-            var patientData = await _dbContext.PatientData.SingleAsync(x => x.UserId == id);
+            var patientData = await _dbContext
+                .PatientData
+                .Include(p => p.MilitaryData)
+                .SingleAsync(x => x.UserId == id);
 
             var dto = patientData.ToDto();
             return dto;
@@ -36,7 +39,11 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<GetPatientDataDto> UpdatePatientAsync(UpdatePatientDto updatePatientDto)
         {
-            var currentEntityToUpdate = await _dbContext.PatientData.SingleAsync(p => p.UserId == updatePatientDto.Id);
+            var currentEntityToUpdate = await _dbContext
+                .PatientData
+                .Include(p => p.MilitaryData)
+                .SingleAsync(p => p.UserId == updatePatientDto.Id);
+
             updatePatientDto.ToCurrentEntity(currentEntityToUpdate);
 
             _dbContext.PatientData.Update(currentEntityToUpdate);

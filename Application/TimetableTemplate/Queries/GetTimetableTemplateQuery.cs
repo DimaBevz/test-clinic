@@ -5,9 +5,9 @@ using Mediator;
 
 namespace Application.TimetableTemplate.Queries
 {
-    public record GetTimetableTemplateQuery(GetTimetableTemplateDto Request) : IQuery<GetTimetablesDto>;
+    public record GetTimetableTemplateQuery(GetTimetableTemplateDto Request) : IQuery<GetTimetablesDto?>;
 
-    public class GetTimetableTemplateQueryHandler : IQueryHandler<GetTimetableTemplateQuery, GetTimetablesDto>
+    public class GetTimetableTemplateQueryHandler : IQueryHandler<GetTimetableTemplateQuery, GetTimetablesDto?>
     {
         private readonly ITimetableRepository _timetableRepository;
 

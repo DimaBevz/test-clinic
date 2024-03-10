@@ -16,6 +16,7 @@
         public bool IsArchived { get; set; } = false;
         public bool IsDeleted { get; set; } = false;
 
+        public MeetingHistory MeetingHistory { get; set; } = null!;
         public SessionDetail? SessionDetail { get; set; }
 
         public List<ChatHistory> ChatHistories { get; set; } = null!;

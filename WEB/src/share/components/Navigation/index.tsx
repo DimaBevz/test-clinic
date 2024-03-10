@@ -2,14 +2,12 @@ import { Box, Icon } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { FaHandHoldingMedical } from "react-icons/fa";
-import { MdHelpOutline } from "react-icons/md";
-import { MdOutlineBugReport } from "react-icons/md";
+import { FaHandHoldingMedical, FaRegListAlt } from "react-icons/fa";
+import { MdChecklistRtl, MdHelpOutline, MdOutlineBugReport } from "react-icons/md";
 import { GrSchedule } from "react-icons/gr";
-import { FaRegListAlt } from "react-icons/fa";
 
 import { useAppSelector } from "@store/index.ts";
-import authSelectors from "../../../features/auth/auth.selectors.ts";
+import authSelectors from "../../../store/auth/auth.selectors.ts";
 
 import "./index.scss";
 
@@ -23,6 +21,7 @@ export const Navigation = () => {
   const isBug = location.pathname === "/report-bug";
   const isAppointments = location.pathname.includes("appointments");
   const isDoctors = location.pathname.includes("doctors");
+  const isTests = location.pathname.includes("tests");
 
   return (
     <Box className="Navigation">
@@ -51,6 +50,15 @@ export const Navigation = () => {
         <Icon as={FaRegListAlt} w={4} h={4} />
         {t("Records")}
       </Box>
+      {user?.role === 0 && (
+        <Box
+          className={`Navigation__item ${isTests ? "active" : ""}`}
+          onClick={() => navigate("/tests")}
+        >
+          <Icon as={MdChecklistRtl} w={4} h={4} />
+          {t("Tests")}
+        </Box>
+      )}
       <Box
         onClick={() => navigate("/help")}
         className={`Navigation__item ${isHelp ? "active" : ""}`}

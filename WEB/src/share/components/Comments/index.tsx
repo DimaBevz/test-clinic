@@ -1,11 +1,11 @@
 import { Divider, Heading, Stack, Text, VStack } from "@chakra-ui/react";
 import "./index.scss";
-import { CommentModel } from "@interfaces/comment.ts";
+import { ICommentModel } from "@interfaces/comment.ts";
 import { StarRating } from "@components/index.ts";
 import { useTranslation } from "react-i18next";
 import NoContent from "@components/NoContent";
 
-const Comment = ( { comment, visitorId }: { comment: CommentModel, visitorId?: string } ) => {
+const Comment = ( { comment, visitorId }: { comment: ICommentModel, visitorId?: string } ) => {
 	console.log(visitorId);
 	return (
 		<Stack className="Comment">
@@ -26,13 +26,13 @@ const Comment = ( { comment, visitorId }: { comment: CommentModel, visitorId?: s
 	);
 }
 
-const Comments = ( { comments, isBigger, visitorId }: { comments: CommentModel[] | undefined, isBigger: boolean, visitorId?: string } ) => {
+const Comments = ( { comments, isBigger, visitorId }: { comments: ICommentModel[] | undefined, isBigger: boolean, visitorId?: string } ) => {
 	const { t } = useTranslation();
 	
 	return (
 		<Stack className="Comments">
 			<Heading as={ "h4" } size={ "md" } pb={ 3 }>{ t( "Comments" ) }</Heading>
-			<Stack maxH={ isBigger? "700px" :"500px" } overflowY="auto">
+			<Stack maxH={ isBigger? "700px" :"500px" } minH="100px" overflowY="auto">
 				{comments?.length ? (
 					comments.map((comment, index) => (
 						<VStack key={comment.id} align="stretch">
@@ -51,4 +51,4 @@ const Comments = ( { comments, isBigger, visitorId }: { comments: CommentModel[]
 };
 
 export default Comments;
-  
+

@@ -1,4 +1,5 @@
-﻿using Amazon.CDK;
+﻿using System.Collections.Generic;
+using Amazon.CDK;
 using CdkForDotnetDevelopers.Stacks;
 
 namespace CdkForDotnetDevelopers
@@ -8,8 +9,18 @@ namespace CdkForDotnetDevelopers
         public static void Main(string[] args)
         {
             var app = new App();
-            new CdkForDotnetDevelopersStack(app, "CdkForDotnetDevelopersStack", new StackProps{});
-            new FargateStack(app, "ECSCluster", new StackProps{});
+            var resources = new MainResources(app, "CdkForDotnetDevelopersStack", new StackProps()
+            {
+                StackName = "CdkForDotnetDevelopersStack",
+            });
+            _ = new Ec2Stack(app, "ECSCluster", new Ec2StackProps
+            {
+                UserPoolClient = resources.UserPoolClient,
+                UserPoolClientDev = resources.UserPoolClientDev,
+                UserPool = resources.UserPool,
+                UserPoolDev = resources.UserPoolDev,
+            });
+            
             app.Synth();
         }
     }

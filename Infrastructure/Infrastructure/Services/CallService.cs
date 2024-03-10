@@ -16,7 +16,6 @@ public class CallService : ICallService
 
     public CallService(HttpClient client)
     {
-        
         _client = client;
         _options = new JsonSerializerOptions
         {
@@ -34,20 +33,21 @@ public class CallService : ICallService
             PresetName = callData.IsHost ? "group_call_host" : "group_call_participant",
             CustomParticipantId = callData.UserId,
         };
+
         var data = JsonSerializer.Serialize(requestBody, _options);
         
-        var request = new HttpRequestMessage( HttpMethod.Post,$"/v2/meetings/{callData.MeetingId}/participants")
+        var request = new HttpRequestMessage(HttpMethod.Post,$"/v2/meetings/{callData.MeetingId}/participants")
         {
-            Content = new StringContent(data){
+            Content = new StringContent(data)
+            {
                 Headers =
                 {
                     ContentType = new MediaTypeHeaderValue("application/json")
                 }
-        
-        }
+            }
         };
+
         using var response = await _client.SendAsync(request);
-        
         response.EnsureSuccessStatusCode();
         
         var body = await response.Content.ReadFromJsonAsync<AddParticipantToMeetingResponse>(_options);
@@ -79,8 +79,8 @@ public class CallService : ICallService
 
             }
         };
-        using var response = await _client.SendAsync(request);
 
+        using var response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
         
         var body = await response.Content.ReadFromJsonAsync<AddMeetingResponse>(_options);

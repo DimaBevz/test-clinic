@@ -13,6 +13,5 @@ internal class TestQuestionConfiguration : IEntityTypeConfiguration<TestQuestion
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.TestId).HasColumnName("test_id");
         builder.Property(x => x.Text).HasColumnName("text");
-        builder.Property(x => x.Number).HasColumnName("number");
     }
 }

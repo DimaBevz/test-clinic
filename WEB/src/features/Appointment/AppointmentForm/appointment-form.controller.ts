@@ -3,15 +3,13 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useLazyGetAvailableTimetableQuery } from "@features/TimeTable/TimeTableForm/time-table-form.service";
-
 import {
   IAppointmentFormInput,
   ICreateSessionReq,
 } from "./appointment-form.interface";
-import { useCreateSessionMutation } from "./appointment-form.service";
-import { useToast } from "@hooks/useToast";
-import { ApiError } from "@interfaces/general";
+import { useToast } from "@hooks/general/useToast";
+import { useCreateSessionMutation } from "@api/session.service";
+import { useAvailableTimetable } from "@hooks/appointment/useAvailableTimetable";
 
 const painScale = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -20,15 +18,11 @@ function useAppointmentFormController() {
   const { successToast, errorToast } = useToast();
   const { t } = useTranslation();
   const { id } = useParams();
-  const [
-    getAvailableTimetable,
-    {
-      data: availableTimetableData,
-      isLoading: isAvailableTimetableDataLoading,
-      isError: isAvailableTimetableDataError,
-      error: availableTimetableDataError,
-    },
-  ] = useLazyGetAvailableTimetableQuery();
+  const {
+    availableTimetableData,
+    isAvailableTimetableDataLoading,
+    isAvailableTimetableDataError,
+  } = useAvailableTimetable({ id });
 
   const [
     createSession,
@@ -85,16 +79,10 @@ function useAppointmentFormController() {
   };
 
   useEffect(() => {
-    if (id) {
-      getAvailableTimetable(id);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (isAvailableTimetableDataError) {
-      errorToast((availableTimetableDataError as ApiError)?.data?.title as string);
-    }
-  }, [isAvailableTimetableDataError]);
+    setValue("currentPainScale", 1);
+    setValue("averagePainScaleLastMonth", 1);
+    setValue("highestPainScaleLastMonth", 1);
+  }, []);
 
   return {
     availableTimetable: {

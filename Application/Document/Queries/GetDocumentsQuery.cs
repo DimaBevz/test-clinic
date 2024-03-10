@@ -1,5 +1,4 @@
-﻿using Application.Common.DTOs;
-using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Document.DTOs.ResponseDTOs;
 using Application.Mappers;

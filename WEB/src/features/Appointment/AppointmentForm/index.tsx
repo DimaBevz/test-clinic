@@ -1,29 +1,42 @@
 import {
   Accordion,
-  AccordionItem,
+  
   AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
+  AccordionItem,
+  AccordionPanel, Badge,
   Box,
   Button,
   FormControl,
   FormLabel,
+  Grid,
+  HStack,
+  Icon,
+  Image,
   Select,
-  Avatar,
+  Stack,
   Textarea,
+  Text,
 } from "@chakra-ui/react";
+
 import { Controller } from "react-hook-form";
-import { CustomContainer } from "@components/Container";
-import { CustomPaper } from "@components/Paper";
 import useAppointmentFormController from "./appointment-form.controller";
 import { Preloader } from "@components/preloader/Preloader";
 
 import "./index.scss";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
-import { formatUTC } from "@utils/formatUTC";
+
+import { RxAvatar } from "react-icons/rx";
+import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { Container } from "@components/Container";
+import { Paper } from "@components/Paper";
+
+import i18n from "../../../i18n.ts";
 
 const AppointmentForm = () => {
+  const ukDateFormat = "HH:mm";
+  const enDateFormat = "h:mm A";
+
   const { t } = useTranslation();
   const { availableTimetable, createSessionObj, form, painScale } =
     useAppointmentFormController();
@@ -43,38 +56,80 @@ const AppointmentForm = () => {
   if (availableTimetable.isLoading) {
     return <Preloader size="xl" />;
   }
-
+  
   if (
     !availableTimetable.data?.availableSessions ||
     availableTimetable.isError
   ) {
     return <div>Error loading data...</div>;
   }
-
+  
   const availableDates = Object.keys(availableTimetable.data.availableSessions);
-
+  
   return (
-    <CustomContainer>
-      <CustomPaper>
+    <Container>
+      <Paper>
         <Box
           as="form"
           onSubmit={handleSubmit(onSubmit)}
           className="AppointmentForm"
         >
           <Box className="AppointmentForm__doctor-info">
-            <Avatar src={availableTimetable.data.physician.photoUrl} />
+            { availableTimetable.data.physician.photoUrl ? (
+              <Image
+                borderRadius="full"
+                verticalAlign="middle"
+                w="60px"
+                h="60px"
+                objectFit="cover"
+                src={ availableTimetable.data.physician.photoUrl }
+                alt={ t( "Doctor`s avatar" ) }
+              />
+            ) : (
+              <Icon as={ RxAvatar } w="60px" h="60px" color="#ECC94B"/>
+            ) }
             <Box>
-              <p className="AppointmentForm__doctor-name">{`${availableTimetable.data.physician.firstName} ${availableTimetable.data.physician.patronymic ? availableTimetable.data.physician.patronymic : ""} ${availableTimetable.data.physician.lastName}`}</p>
-              <p className="AppointmentForm__text">Санітаролог</p>
+              <Text className="AppointmentForm__doctor-name">
+                { `
+                ${ availableTimetable.data.physician.firstName }
+                ${ availableTimetable.data.physician.patronymic ? availableTimetable.data.physician.patronymic : "" }
+                ${ availableTimetable.data.physician.lastName }
+              ` }
+              </Text>
+              <Stack
+                direction="row"
+                flexWrap="wrap"
+                alignItems="baseline"
+                spacing={2}
+              >
+                {availableTimetable.data.physician.positions.map((position, index) => (
+                  <Badge
+                    key={index}
+                    px="2"
+                    py="1"
+                    borderRadius="full"
+                    colorScheme="yellow"
+                    flexShrink={1}
+                    isTruncated
+                    maxWidth="100%"
+                  >
+                    {position.specialty}
+                  </Badge>
+                ))}
+              </Stack>
             </Box>
           </Box>
           <Accordion allowMultiple index={activeIndex}>
             <AccordionItem>
               <AccordionButton onClick={() => setActiveIndex(0)}>
                 <Box flex="1" textAlign="left">
-                  <p className="AppointmentForm__text">{t("SelectDate")}</p>
+                  <Text className="AppointmentForm__text">{ t( "SelectDate" ) }</Text>
                 </Box>
-                <AccordionIcon />
+                { watch( "date" ) ? (
+                  <CheckIcon color="green" fontSize="12px"/>
+                ) : (
+                  <CloseIcon color="red" fontSize="12px"/>
+                ) }
               </AccordionButton>
               <AccordionPanel pb={4}>
                 <FormControl isRequired>
@@ -86,11 +141,11 @@ const AppointmentForm = () => {
                       <Select
                         id="date"
                         placeholder={t("SelectDate")}
-                        colorScheme="orange"
+                        colorScheme="yellow"
                         {...field}
                         onChange={(e) => handleDateChange(e.target.value)}
                       >
-                        {availableDates.map((date) => (
+                        {availableDates.map((date: string) => (
                           <option key={date} value={date}>
                             {date}
                           </option>
@@ -101,13 +156,17 @@ const AppointmentForm = () => {
                 </FormControl>
               </AccordionPanel>
             </AccordionItem>
-
+            
             <AccordionItem isDisabled={!watch("date")}>
               <AccordionButton onClick={() => setActiveIndex(1)}>
                 <Box flex="1" textAlign="left">
-                  <p className="AppointmentForm__text">{t("SelectTimeSlot")}</p>
+                  <Text className="AppointmentForm__text">{ t( "SelectTimeSlot" ) }</Text>
                 </Box>
-                <AccordionIcon />
+                { watch( "timeSlot" ) ? (
+                  <CheckIcon color="green" fontSize="12px"/>
+                ) : (
+                  <CloseIcon color="red" fontSize="12px"/>
+                ) }
               </AccordionButton>
               <AccordionPanel pb={4}>
                 <FormControl isRequired>
@@ -124,13 +183,12 @@ const AppointmentForm = () => {
                       >
                         {(availableTimetable.data as any).availableSessions[
                           watch("date")
-                        ]?.map((slot: any, index: number) => (
+                          ]?.map( ( slot: any, index: number ) => (
                           <option key={index} value={JSON.stringify(slot)}>
-                            {`${new Date(
-                              formatUTC(slot.startTime)
-                            ).toLocaleTimeString()} - ${new Date(
-                              formatUTC(slot.endTime)
-                            ).toLocaleTimeString()}`}
+                            {`${new Date(slot.startTime
+                            ).toLocaleTimeString(i18n.language, { hour: 'numeric', minute: 'numeric' })} - ${new Date(
+                              slot.endTime
+                            ).toLocaleTimeString(i18n.language, { hour: 'numeric', minute: 'numeric' })}`}
                           </option>
                         ))}
                       </Select>
@@ -139,15 +197,19 @@ const AppointmentForm = () => {
                 </FormControl>
               </AccordionPanel>
             </AccordionItem>
-
+            
             <AccordionItem isDisabled={!watch("timeSlot")}>
               <AccordionButton onClick={() => setActiveIndex(2)}>
                 <Box flex="1" textAlign="left">
-                  <p className="AppointmentForm__text">
-                    {t("ProblemDesctiption")}
-                  </p>
+                  <Text className="AppointmentForm__text">
+                    { t( "ProblemDescription" ) }
+                  </Text>
                 </Box>
-                <AccordionIcon />
+                { watch( "description" ) ? (
+                  <CheckIcon color="green" fontSize="12px"/>
+                ) : (
+                  <CloseIcon color="red" fontSize="12px"/>
+                ) }
               </AccordionButton>
               <AccordionPanel pb={4}>
                 <Box className="AppointmentForm__pain-scale">
@@ -162,7 +224,12 @@ const AppointmentForm = () => {
                         <Select
                           id="currentPainScale"
                           {...field}
-                          onChange={(e) => handlePainScaleChange("currentPainScale", +e.target.value)}
+                          onChange={(e) =>
+                            handlePainScaleChange(
+                              "currentPainScale",
+                              +e.target.value
+                            )
+                          }
                         >
                           {painScale.map((value: number) => (
                             <option key={value} value={value}>
@@ -184,7 +251,12 @@ const AppointmentForm = () => {
                         <Select
                           id="averagePainScaleLastMonth"
                           {...field}
-                          onChange={(e) => handlePainScaleChange("averagePainScaleLastMonth", +e.target.value)}
+                          onChange={(e) =>
+                            handlePainScaleChange(
+                              "averagePainScaleLastMonth",
+                              +e.target.value
+                            )
+                          }
                         >
                           {painScale.map((value: number) => (
                             <option key={value} value={value}>
@@ -206,7 +278,12 @@ const AppointmentForm = () => {
                         <Select
                           id="highestPainScaleLastMonth"
                           {...field}
-                          onChange={(e) => handlePainScaleChange("highestPainScaleLastMonth", +e.target.value)}
+                          onChange={(e) =>
+                            handlePainScaleChange(
+                              "highestPainScaleLastMonth",
+                              +e.target.value
+                            )
+                          }
                         >
                           {painScale.map((value: number) => (
                             <option key={value} value={value}>
@@ -225,59 +302,94 @@ const AppointmentForm = () => {
                     render={({ field }) => (
                       <Textarea
                         id="description"
-                        placeholder={t("ProblemDesctiption")}
+                        placeholder={ t( "ProblemDescription" ) }
                         value={field.value}
-                        onChange={(e) => handleDescriptionChange(e.target.value)}
+                        onChange={(e) =>
+                          handleDescriptionChange(e.target.value)
+                        }
                       />
                     )}
                   />
                 </FormControl>
               </AccordionPanel>
             </AccordionItem>
-
-            <AccordionItem isDisabled={!watch("description")}>
+            
+            <AccordionItem isDisabled={!watch("description")}  borderBottomWidth="0px !important">
               <AccordionButton onClick={() => setActiveIndex(3)}>
                 <Box flex="1" textAlign="left">
-                  <p className="AppointmentForm__text">
+                  <Text className="AppointmentForm__text">
                     {t("ConfirmAppointment")}
-                  </p>
+                  </Text>
                 </Box>
-                <AccordionIcon />
+                { watch( "description" ) ? (
+                  <CheckIcon color="green" fontSize="12px"/>
+                ) : (
+                  <CloseIcon color="red" fontSize="12px"/>
+                ) }
               </AccordionButton>
-              <AccordionPanel pb={4}>
-                <Box>
-                  <p className="AppointmentForm__text">
-                    {t("Date")}: {watch("date")}
-                  </p>
-                  <p className="AppointmentForm__text">
-                    {t("TimeSlot")}:{" "}
-                    {watch("timeSlot") &&
-                      dayjs(JSON.parse(watch("timeSlot")).startTime).format(
-                        "HH:mm:ss"
-                      )}
-                    -
-                    {watch("timeSlot") &&
-                      dayjs(JSON.parse(watch("timeSlot")).endTime).format(
-                        "HH:mm:ss"
-                      )}
-                  </p>
-                  <p className="AppointmentForm__text">
-                    {t("CurrentPainScale")}: {watch("currentPainScale")}
-                  </p>
-                  <p className="AppointmentForm__text">
-                    {t("AveragePainScaleLastMonth")}: {watch("averagePainScaleLastMonth")}
-                  </p>
-                  <p className="AppointmentForm__text">
-                    {t("HighestPainScaleLastMonth")}: {watch("highestPainScaleLastMonth")}
-                  </p>
-                  <p className="AppointmentForm__text">
-                    {t("ProblemDesctiption")}: {watch("description")}
-                  </p>
-                </Box>
+              <AccordionPanel pb={4} borderRadius="15px">
+                <Stack gap="6px">
+                  <Grid className="grid">
+                    <HStack justifyContent="space-between" gap={2} maxW="450px">
+                      <Text className="AppointmentForm__text">
+                        { t( "Date" ) }:
+                      </Text>
+                      <Text className="AppointmentForm__text">
+                        { watch( "date" ) }
+                      </Text>
+                    </HStack>
+                    <HStack justifyContent="space-between" gap={2} maxW="450px">
+                      <Text className="AppointmentForm__text">
+                        { t( "TimeSlot" ) }:
+                      </Text>
+                      <Text className="AppointmentForm__text">
+                        { watch( "timeSlot" ) &&
+                          dayjs( JSON.parse( watch( "timeSlot" ) ).startTime ).format(
+                            i18n.language === "en" ? enDateFormat : ukDateFormat,
+                          ) }
+                        -
+                        { watch( "timeSlot" ) &&
+                          dayjs( JSON.parse( watch( "timeSlot" ) ).endTime ).format(
+                            i18n.language === "en" ? enDateFormat : ukDateFormat,
+                          ) }
+                      </Text>
+                    </HStack>
+                    <HStack justifyContent="space-between" gap={2} maxW="450px">
+                      <Text className="AppointmentForm__text">
+                        { t( "CurrentPainScale" ) }:
+                      </Text>
+                      <Text className="AppointmentForm__text">
+                        { watch( "currentPainScale" ) }
+                      </Text>
+                    </HStack>
+                    <HStack justifyContent="space-between" gap={2} maxW="450px">
+                      <Text className="AppointmentForm__text">
+                        { t( "AveragePainScaleLastMonth" ) }:
+                      </Text>
+                      <Text className="AppointmentForm__text">
+                        { watch( "averagePainScaleLastMonth" ) }
+                      </Text>
+                    </HStack>
+                  </Grid>
+                  <HStack justifyContent="space-between" gap={2} maxW="450px">
+                    <Text className="AppointmentForm__text">
+                      {t("HighestPainScaleLastMonth")}:
+                    </Text>
+                    <Text className="AppointmentForm__text">
+                      {watch("highestPainScaleLastMonth")}
+                    </Text>
+                  </HStack>
+                  
+                  <Text className="AppointmentForm__text">
+                    { t( "ProblemDescription" ) }:
+                  </Text>
+                  <Text className="AppointmentForm__text">
+                    { watch( "description" ) }
+                  </Text>
+                </Stack>
                 <Button
                   isLoading={createSessionObj.isLoading}
                   loadingText={t("Submitting")}
-                  colorScheme="orange"
                   mt={4}
                   type="submit"
                 >
@@ -287,8 +399,8 @@ const AppointmentForm = () => {
             </AccordionItem>
           </Accordion>
         </Box>
-      </CustomPaper>
-    </CustomContainer>
+      </Paper>
+    </Container>
   );
 };
 

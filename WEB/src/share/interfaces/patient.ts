@@ -1,12 +1,12 @@
 import { IAuthData } from "@interfaces/IAuth.ts";
 
-export interface PatientsPartialModel {
-	settlement: string
-	street: string
-	house: string
-	apartment: any
-	institution: string
-	position: string
+export interface IPatientsPartialModel {
+  settlement: string;
+  street: string;
+  house: string;
+  apartment: any;
+  institution: string;
+  position: string;
 }
 
-export interface PatientsFullModel extends IAuthData, PatientsPartialModel{}
+export interface IPatientsFullModel extends IAuthData, IPatientsPartialModel {}

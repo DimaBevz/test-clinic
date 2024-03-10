@@ -10,7 +10,7 @@ namespace Application.TimetableTemplate.Queries
     public class GetAvailableTimetableQueryHandler : IQueryHandler<GetAvailableTimetableQuery, GetAvailableTimetableDto>
     {
         private readonly ITimetableRepository _timetableRepository;
-        private const string ExceptionMessage = "There is no timetable for this physician";
+        private const string ExceptionMessage = "There is no timetable for current physician";
 
         public GetAvailableTimetableQueryHandler(ITimetableRepository timetableRepository)
         {

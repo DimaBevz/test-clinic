@@ -1,28 +1,33 @@
-import { useParams } from "react-router-dom";
 import { Box, Button, Heading, HStack, Stack, Textarea } from "@chakra-ui/react";
 import { useAppSelector } from "@store/index.ts";
-import { authSelectors } from "@features/auth";
+import { authSelectors } from "@store/auth";
 import { IAuthData } from "@interfaces/IAuth.ts";
 import { useState } from "react";
 import { StarRating } from "@components/index.ts";
-import commentsService from "@features/Comments/comments.service.ts";
 import { useTranslation } from "react-i18next";
+import { useCreateCommentMutation } from "@api/comments.service";
 
-export const AddComment = ({refetch}: {refetch: () => any}) => {
+interface AddCommentProps {
+  refetch?: () => void;
+  doctorId: string;
+  onClose?: () => void;
+}
+
+export const AddComment = ({refetch, doctorId, onClose}: AddCommentProps) => {
   const [text, setText] = useState("");
   const user = useAppSelector(authSelectors.getAuthUser) as IAuthData;
   const { t } = useTranslation();
-  const { id } = useParams();
-  const [ sendComment, { isLoading } ] = commentsService.useCreateCommentMutation()
+  const [ sendComment, { isLoading } ] = useCreateCommentMutation()
   const [rating, setRating] = useState(0);
   const onSubmit = async () => {
     try {
       await sendComment({
-        physicianId: id as string,
+        physicianId: doctorId as string,
         commentText: text,
         rating: rating,
       })
-      refetch();
+      onClose && onClose();
+      refetch && refetch();
       setText("");
       setRating(0);
     } catch (error) {
@@ -43,14 +48,13 @@ export const AddComment = ({refetch}: {refetch: () => any}) => {
                 placeholder="Залишити коментар..."
                 value={text}
                 disabled={isLoading}
-                colorScheme="orange"
+                colorScheme="yellow"
                 onChange={(e) => setText(e.target.value)}
               />
               <HStack justifyContent="space-between">
                 <Box/>
                 <Button
                   size='sm'
-                  colorScheme="orange"
                   isDisabled={isLoading || text === "" || rating === 0}
                   onClick={onSubmit}
                 >

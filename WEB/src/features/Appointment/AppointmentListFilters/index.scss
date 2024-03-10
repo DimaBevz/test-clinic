@@ -1,8 +1,14 @@
 .AppointmentListFilters {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 20px;
+
+  &__form {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+  }
 
   &__filters {
     display: flex;

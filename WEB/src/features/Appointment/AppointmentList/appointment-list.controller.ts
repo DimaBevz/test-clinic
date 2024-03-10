@@ -1,16 +1,16 @@
 import { useEffect } from "react";
-import { useToast } from "@hooks/useToast";
-import { useGetSessionListMutation } from "../AppointmentForm/appointment-form.service";
+import { useToast } from "@hooks/general/useToast";
 import { ApiError } from "@interfaces/general";
-import { useAuthUserController } from "@features/auth";
 import { IGetSessionListReq } from "./appointment-list.interface";
 import { useSearchParams } from "react-router-dom";
 import { FormData } from "../AppointmentListFilters/appointments-list-filters.controller";
+import { useGetSessionListMutation } from "@api/session.service";
+import useAuthUser from "@hooks/general/useAuthUser";
 
 function useAppointmentListController() {
   const [searchParams] = useSearchParams();
   const { errorToast } = useToast();
-  const { user } = useAuthUserController();
+  const { user } = useAuthUser();
   const sessionDateRange = searchParams.get("sessionDateRange")?.split("—") as [
     string,
     string
@@ -18,6 +18,10 @@ function useAppointmentListController() {
   const sessionStatus = searchParams.get(
     "sessionStatus"
   ) as FormData["sessionStatus"];
+  const listType = searchParams.get(
+    "type"
+  );
+  const isListType = listType === "list";
 
   const [
     getSessionList,
@@ -59,6 +63,7 @@ function useAppointmentListController() {
       data: getSessionListData?.sessions ?? [],
       isLoading: isGetSessionListLoading,
       isError: isGetSessionListError,
+      isListType
     },
   };
 }

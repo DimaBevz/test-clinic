@@ -1,26 +1,23 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Divider,
-  HStack,
-  Icon,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Badge, Box, Button, Divider, HStack, Icon, Stack, Text } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ISessionModel } from "../AppointmentList/appointment-list.interface";
 import dayjs from "dayjs";
 import { MdOutlineAccessTime } from "react-icons/md";
 import { IoMdCalendar } from "react-icons/io";
-import { convertTo12HourFormatUTC } from "@utils/formatUTC";
-import { useAuthUserController } from "@features/auth";
+import useAuthUser from "@hooks/general/useAuthUser";
+import { useMeetingState } from "@hooks/general/useMeetingState";
+import { useCountdown } from "@hooks/general/useCountdown";
+import i18n from "../../../i18n.ts";
 
 const AppointmentCard = ({ session }: { session: ISessionModel }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useAuthUserController();
+  const { user } = useAuthUser();
+  
+  const { isMeetingOnGoing, isMeetingAboutToStart, isMeetingFinished, untilMeetingStarts } = useMeetingState(session?.startTime as unknown as string, session?.endTime as unknown as string);
+  const [ minutes, seconds ] = useCountdown( untilMeetingStarts, isMeetingAboutToStart );
+  
   return (
     <Stack
       key={session.sessionId}
@@ -95,9 +92,9 @@ const AppointmentCard = ({ session }: { session: ISessionModel }) => {
                 {t("ReceptionHour")}
               </Text>
 
-              <Text pt={2}>{`${convertTo12HourFormatUTC(
-                `${session?.startTime}`
-              )} - ${convertTo12HourFormatUTC(`${session?.endTime}`)}`}</Text>
+              <Text pt={2}>{`${
+                `${new Date(session?.startTime).toLocaleTimeString(i18n.language, { hour: 'numeric', minute: 'numeric' })}`
+              } - ${`${new Date(session?.endTime).toLocaleTimeString(i18n.language, { hour: 'numeric', minute: 'numeric' })}`}`}</Text>
             </Box>
             <Box>
               <Text display="flex" alignItems="center" gap={2}>
@@ -132,7 +129,6 @@ const AppointmentCard = ({ session }: { session: ISessionModel }) => {
         <HStack gap="20px">
           <Button
             variant="outline"
-            colorScheme="orange"
             onClick={() => navigate(`/appointments/${session.sessionId}`)}
           >
             {t("View")}
@@ -140,14 +136,8 @@ const AppointmentCard = ({ session }: { session: ISessionModel }) => {
         </HStack>
         {!session.isArchived && (
           <HStack gap="20px">
-            <Button
-              variant="solid"
-              colorScheme="orange"
-              onClick={() =>
-                navigate(`/appointments/${session.sessionId}/call`)
-              }
-            >
-              {t("Call")}
+            <Button isDisabled={!isMeetingOnGoing} onClick={ () => navigate( `/appointments/${ session.sessionId }/call` ) }>
+              { !isMeetingFinished && isMeetingAboutToStart && !isMeetingOnGoing && `${ minutes }:${ seconds }` } {t("Call")}
             </Button>
           </HStack>
         )}

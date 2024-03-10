@@ -1,4 +1,6 @@
-﻿namespace Application.Patient.DTOs.ResponseDTOs
+﻿using Application.Military.DTOs.Response;
+
+namespace Application.Patient.DTOs.ResponseDTOs
 {
     public record GetPatientDataDto
     (
@@ -8,6 +10,7 @@
         string House,
         int? Apartment,
         string Institution,
-        string Position
+        string Position,
+        GetMilitaryDataDto? MilitaryData
     );
 }

@@ -14,5 +14,7 @@ namespace Infrastructure.Persistence.Entities
         public int? Apartment { get; set; } 
         public string Institution { get; set; } = string.Empty;
         public string Position {  get; set; } = string.Empty;
+
+        public MilitaryData? MilitaryData { get; set; } 
     }
 }

@@ -1,8 +1,6 @@
 import { Store } from '@reduxjs/toolkit';
 import axios from 'axios';
-
-import API_CONFIG from '@configs/api';
-import { authActions } from "@features/auth";
+import { authActions } from "@store/auth";
 
 /* eslint-disable-next-line */
 let store: Store<any, any>;
@@ -13,8 +11,12 @@ export const injectStoreToHttpClient = (st: Store) => {
 
 
 const httpClient = axios.create({
-	baseURL: API_CONFIG.BASE_URL,
-	headers: API_CONFIG.HEADERS.Auth,
+	// baseURL: `https://dev.prometei-center.pp.ua/api`,
+	baseURL: `/api`,
+	headers: {
+		'Content-Type': 'application/json',
+		accept: 'application/x-www-form-urlencoded',
+	},
 });
 
 httpClient.interceptors.request.use(

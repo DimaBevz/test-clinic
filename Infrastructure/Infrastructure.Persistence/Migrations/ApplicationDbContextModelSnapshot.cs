@@ -17,10 +17,95 @@ namespace Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.ApproveDocumentMessage", b =>
+                {
+                    b.Property<Guid>("PhysicianDataId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("physician_data_id");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.HasKey("PhysicianDataId");
+
+                    b.ToTable("approve_document_message", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.BugReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("topic");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("bug_reports", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.BugReportPhoto", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BugReportId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("bug_report_id");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("PhotoObjectKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("photo_object_key");
+
+                    b.Property<string>("PresignedUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("presigned_url");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BugReportId");
+
+                    b.ToTable("bug_report_photos", (string)null);
+                });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.ChatHistory", b =>
                 {
@@ -159,6 +244,115 @@ namespace Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("documents", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.MeetingHistory", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("EndedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ended_at");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.HasKey("SessionId");
+
+                    b.ToTable("meeting_history", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.MilitaryData", b =>
+                {
+                    b.Property<Guid>("PatientDataId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_data_id");
+
+                    b.Property<int?>("DisabilityCategory")
+                        .HasColumnType("integer")
+                        .HasColumnName("disability_category");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("document_number");
+
+                    b.Property<bool>("HasDisability")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_disability");
+
+                    b.Property<bool>("HasDocuments")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_documents");
+
+                    b.Property<bool>("HasFamilyInNeed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_family_in_need");
+
+                    b.Property<string>("HealthProblems")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("health_problems");
+
+                    b.Property<string>("HowLearnedAboutRehabCenter")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("how_learned_about_rehab_center");
+
+                    b.Property<bool>("IsOnVacation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_on_vacation");
+
+                    b.Property<bool>("IsVeteran")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_veteran");
+
+                    b.Property<bool>("NeedMedicalOrPsychoCare")
+                        .HasColumnType("boolean")
+                        .HasColumnName("need_medical_or_psycho_care");
+
+                    b.Property<string>("PlaceOfRehabilitation")
+                        .HasColumnType("text")
+                        .HasColumnName("place_of_rehabilitation");
+
+                    b.Property<string>("RehabilitationAndSupportNeeds")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rehabilitation_and_support_needs");
+
+                    b.Property<string>("ResultOfRehabilitation")
+                        .HasColumnType("text")
+                        .HasColumnName("result_of_rehabilitation");
+
+                    b.Property<string>("ServicePlace")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("service_place");
+
+                    b.Property<string>("Specialty")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("specialty");
+
+                    b.Property<bool>("WasRehabilitated")
+                        .HasColumnType("boolean")
+                        .HasColumnName("was_rehabilitated");
+
+                    b.HasKey("PatientDataId");
+
+                    b.ToTable("military_data", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.PatientData", b =>
@@ -306,32 +500,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("sessions", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionDayTemplate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("session_day_template_id");
-
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("integer")
-                        .HasColumnName("day_of_week");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.Property<Guid>("TimetableTemplateId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("timetable_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TimetableTemplateId");
-
-                    b.ToTable("session_day_templates", (string)null);
-                });
-
             modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionDetail", b =>
                 {
                     b.Property<Guid>("SessionId")
@@ -376,30 +544,56 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("session_details", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionTemplate", b =>
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionTemplateDay", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("session_template_id");
+                        .HasColumnName("session_template_day_id");
 
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time without time zone")
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("integer")
+                        .HasColumnName("day_of_week");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<Guid>("TimetableTemplateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("timetable_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TimetableTemplateId");
+
+                    b.ToTable("session_template_days", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionTemplateTimes", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_template_times_id");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_time");
 
-                    b.Property<Guid>("SessionDayTemplateId")
+                    b.Property<Guid>("SessionTemplateDayId")
                         .HasColumnType("uuid")
-                        .HasColumnName("session_day_template_id");
+                        .HasColumnName("session_template_day_id");
 
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time without time zone")
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_time");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SessionDayTemplateId");
+                    b.HasIndex("SessionTemplateDayId");
 
-                    b.ToTable("session_templates", (string)null);
+                    b.ToTable("session_template_times", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.Test", b =>
@@ -497,10 +691,6 @@ namespace Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<int>("Number")
-                        .HasColumnType("integer")
-                        .HasColumnName("number");
 
                     b.Property<Guid>("TestId")
                         .HasColumnType("uuid")
@@ -629,6 +819,10 @@ namespace Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("first_name");
 
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_banned");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -686,6 +880,39 @@ namespace Infrastructure.Persistence.Migrations
                     b.ToTable("user_photo_data", (string)null);
                 });
 
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.ApproveDocumentMessage", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.Entities.PhysicianData", "PhysicianData")
+                        .WithOne("ApproveDocumentMessage")
+                        .HasForeignKey("Infrastructure.Persistence.Entities.ApproveDocumentMessage", "PhysicianDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PhysicianData");
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.BugReport", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.BugReportPhoto", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.Entities.BugReport", "BugReport")
+                        .WithMany()
+                        .HasForeignKey("BugReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BugReport");
+                });
+
             modelBuilder.Entity("Infrastructure.Persistence.Entities.ChatHistory", b =>
                 {
                     b.HasOne("Infrastructure.Persistence.Entities.Session", "Session")
@@ -737,6 +964,28 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.MeetingHistory", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.Entities.Session", "Session")
+                        .WithOne("MeetingHistory")
+                        .HasForeignKey("Infrastructure.Persistence.Entities.MeetingHistory", "SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.MilitaryData", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.Entities.PatientData", "PatientData")
+                        .WithOne("MilitaryData")
+                        .HasForeignKey("Infrastructure.Persistence.Entities.MilitaryData", "PatientDataId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PatientData");
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.PatientData", b =>
@@ -799,15 +1048,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("PhysicianData");
                 });
 
-            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionDayTemplate", b =>
-                {
-                    b.HasOne("Infrastructure.Persistence.Entities.TimetableTemplate", null)
-                        .WithMany("SessionDayTemplates")
-                        .HasForeignKey("TimetableTemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionDetail", b =>
                 {
                     b.HasOne("Infrastructure.Persistence.Entities.Diagnosis", "Diagnosis")
@@ -825,15 +1065,24 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("Session");
                 });
 
-            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionTemplate", b =>
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionTemplateDay", b =>
                 {
-                    b.HasOne("Infrastructure.Persistence.Entities.SessionDayTemplate", "SessionDayTemplate")
-                        .WithMany("SessionTemplates")
-                        .HasForeignKey("SessionDayTemplateId")
+                    b.HasOne("Infrastructure.Persistence.Entities.TimetableTemplate", null)
+                        .WithMany("SessionTemplateDays")
+                        .HasForeignKey("TimetableTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionTemplateTimes", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.Entities.SessionTemplateDay", "SessionTemplateDay")
+                        .WithMany("SessionTemplateTimes")
+                        .HasForeignKey("SessionTemplateDayId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SessionDayTemplate");
+                    b.Navigation("SessionTemplateDay");
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.TestCriteria", b =>
@@ -945,8 +1194,15 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.PatientData", b =>
+                {
+                    b.Navigation("MilitaryData");
+                });
+
             modelBuilder.Entity("Infrastructure.Persistence.Entities.PhysicianData", b =>
                 {
+                    b.Navigation("ApproveDocumentMessage");
+
                     b.Navigation("Comments");
 
                     b.Navigation("PhysicianSpecialties");
@@ -963,17 +1219,20 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("ChatHistories");
 
-                    b.Navigation("SessionDetail");
-                });
+                    b.Navigation("MeetingHistory")
+                        .IsRequired();
 
-            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionDayTemplate", b =>
-                {
-                    b.Navigation("SessionTemplates");
+                    b.Navigation("SessionDetail");
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionDetail", b =>
                 {
                     b.Navigation("Documents");
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.Entities.SessionTemplateDay", b =>
+                {
+                    b.Navigation("SessionTemplateTimes");
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.TestQuestion", b =>
@@ -983,7 +1242,7 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.TimetableTemplate", b =>
                 {
-                    b.Navigation("SessionDayTemplates");
+                    b.Navigation("SessionTemplateDays");
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.Entities.User", b =>

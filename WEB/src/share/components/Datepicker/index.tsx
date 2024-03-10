@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import ReactDatePicker from "react-datepicker";
+import ReactDatePicker, { registerLocale } from "react-datepicker";
+
 import {
   FormControl,
   FormLabel,
@@ -10,13 +11,20 @@ import {
   InputRightElement,
   forwardRef,
 } from "@chakra-ui/react";
+
 import { CalendarIcon } from "@chakra-ui/icons";
 import { MdAccessTime } from "react-icons/md";
 
 import "react-datepicker/dist/react-datepicker.css";
-import { formatUTC } from "@utils/formatUTC";
 
 import "./index.scss";
+
+import i18n from "../../../i18n.ts";
+
+import en from 'date-fns/locale/en-US';
+registerLocale('en', en)
+import uk from 'date-fns/locale/uk';
+registerLocale('uk', uk)
 
 interface Props {
   htmlFor: string;
@@ -37,7 +45,6 @@ const CustomInput = forwardRef(
     <InputGroup>
       <Input
         className="DatePicker__input"
-        colorScheme="yellow"
         ref={ref}
         value={value}
         onClick={onClick}
@@ -47,7 +54,6 @@ const CustomInput = forwardRef(
       <InputRightElement>
         <IconButton
           disabled={disabled}
-          colorScheme="yellow"
           aria-label="Select date"
           className={`${disabled ? "DatePicker__icon" : ""}`}
           icon={showTimeSelectOnly ? <MdAccessTime /> : <CalendarIcon />}
@@ -82,8 +88,8 @@ const DatePicker = ({
         </FormLabel>
       )}
       <ReactDatePicker
-        dateFormat={dateFormat}
-        selected={formatUTC(selectedDate, true)}
+        locale={i18n.language === "en" ? en : uk}
+        selected={selectedDate}
         popperPlacement="bottom-start"
         popperModifiers={[
           {
@@ -102,7 +108,7 @@ const DatePicker = ({
           },
         ]}
         onChange={(date: Date) => {
-          const value = formatUTC(date);
+          const value = date;
           onChange(value);
         }}
         customInput={
@@ -119,6 +125,7 @@ const DatePicker = ({
         showTimeSelectOnly={showTimeSelectOnly ?? false}
         timeCaption={timeCaption}
         timeIntervals={timeIntervals}
+        dateFormat={dateFormat}
       />
     </FormControl>
   );

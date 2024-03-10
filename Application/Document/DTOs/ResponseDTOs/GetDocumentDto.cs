@@ -1,6 +1,8 @@
 ﻿namespace Application.Document.DTOs.ResponseDTOs;
 
-public record GetDocumentDto(
+public record GetDocumentDto
+(
     Guid Id,
     string Title,
-    string PresignedUrl);
+    string PresignedUrl
+);

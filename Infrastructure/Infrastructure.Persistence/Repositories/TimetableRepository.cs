@@ -1,9 +1,11 @@
 ﻿using Application.Common.Interfaces.Repositories;
+using Application.Position.DTOs.ResponseDTOs;
 using Application.TimetableTemplate.DTOs;
 using Application.TimetableTemplate.DTOs.Request;
 using Application.TimetableTemplate.DTOs.Response;
 using Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -26,8 +28,9 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<AddTimetableTemplateDto> CreateDefaultTemplateAsync(Guid physicianId, CancellationToken cancellationToken)
         {
-            var startDate = DateOnly.FromDateTime(DateTime.Now);
-            var endDate = DateOnly.FromDateTime(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day+7));
+            var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            var endDate = startDate.AddDays(7);
+
             var sessionTemplates = GetDefaultSessions();
 
             var request = new AddTimetableTemplateDto(startDate, endDate,
@@ -38,7 +41,6 @@ namespace Infrastructure.Persistence.Repositories
 
             return result;
         }
-
 
         public async Task<GetTimetablesDto?> GetTimetablesAsync(GetTimetableTemplateDto request, CancellationToken cancellationToken)
         {
@@ -66,39 +68,46 @@ namespace Infrastructure.Persistence.Repositories
             return result;
         }
 
-        public async Task<GetAvailableTimetableDto> GetAvailableTimetableAsync(Guid physicianId, CancellationToken cancellationToken)
+        public async Task<GetAvailableTimetableDto?> GetAvailableTimetableAsync(Guid physicianId, CancellationToken cancellationToken)
         {
-            var timetableTemplate = await _dbContext.TimetableTemplates
-                .FirstOrDefaultAsync(t => t.PhysicianDataId == physicianId, cancellationToken);
+            var availableTimetable = new Dictionary<DateOnly, List<SessionTimeTemplateDto>>();
+
+            var timetableTemplate = await _dbContext.TimetableTemplates.SingleOrDefaultAsync
+            (
+                t => t.PhysicianDataId == physicianId, 
+                cancellationToken
+            );
 
             if (timetableTemplate is null)
             {
                 return null;
             }
 
-            var sessionDays = await GetSessionDayTemplatesAsync(timetableTemplate.Id, cancellationToken);
-            var sessions = await _dbContext.Sessions
+            var activeSessionDays = await GetActiveSessionDayTemplatesAsync(timetableTemplate.Id, cancellationToken);
+            var assignedSessions = await _dbContext.Sessions
                 .Where(s => s.PhysicianDataId == physicianId)
                 .ToListAsync(cancellationToken);
 
-            var availableTimetable = new Dictionary<DateOnly, List<SessionTimeTemplateDto>>();
-
-            var timetableDates = EnumerateDates(timetableTemplate.StartDate, timetableTemplate.EndDate,
-                sessionDays.Select(st => st.DayOfWeek).Distinct().ToList())
-                .Where(d => d.ToDateTime(TimeOnly.MinValue) >= DateTime.Today)
+            var timetableDates = EnumerateDates
+                (
+                    timetableTemplate.StartDate,
+                    timetableTemplate.EndDate,
+                    activeSessionDays.Select(st => st.DayOfWeek).ToList()
+                )
+                .Where(d => d >= DateOnly.FromDateTime(DateTime.Today))
                 .ToList();
-
-            foreach (var day in timetableDates)
+             
+            foreach (var timetableDate in timetableDates)
             {
-                var availableSessionsForDay = GetAvailableSessionsForDay(day, sessionDays, sessions);
+                var availableSessionsForDay = GetAvailableSessionsForDay(timetableDate, activeSessionDays, assignedSessions);
+
                 if (availableSessionsForDay.Any())
                 {
-                    availableTimetable.Add(day, availableSessionsForDay);
+                    availableTimetable.Add(timetableDate, availableSessionsForDay);
                 }
             }
 
             var physician = await GetPhysicianInfoAsync(physicianId, cancellationToken);
-
             var result = new GetAvailableTimetableDto(availableTimetable, physician);
 
             return result;
@@ -107,30 +116,35 @@ namespace Infrastructure.Persistence.Repositories
         public async Task<UpdateTimetableTemplateDto> UpdateTemplateAsync(UpdateTimetableTemplateDto request, CancellationToken cancellationToken)
         {
             var timetableTemplate = await _dbContext.TimetableTemplates
-                    .FirstOrDefaultAsync(t => t.PhysicianDataId == request.PhysicianDataId,
-                    cancellationToken);
+                .SingleAsync(t => t.PhysicianDataId == request.PhysicianDataId, cancellationToken);
 
-            var sessionDays = await _dbContext.SessionDayTemplates
-                .Include(s => s.SessionTemplates)
+            var sessionDays = await _dbContext.SessionTemplateDays
+                .Include(s => s.SessionTemplateTimes)
                 .Where(s => s.TimetableTemplateId == timetableTemplate.Id)
                 .ToListAsync(cancellationToken);
 
-            _dbContext.SessionDayTemplates.RemoveRange(sessionDays);
+            _dbContext.SessionTemplateDays.RemoveRange(sessionDays);
+
             timetableTemplate.StartDate = request.StartDate;
             timetableTemplate.EndDate = request.EndDate;
+
             _dbContext.TimetableTemplates.Update(timetableTemplate);
 
             var sessionDaysUpdate = CreateSessionDays(request.SessionTemplates, timetableTemplate.Id);
+            var sessionTemplateTimesUpdate = CreateSessionTemplateTimes(sessionDaysUpdate, request.SessionTemplates);
 
-            var sessionTemplatesUpdate =
-                CreateSessionTemplates(sessionDaysUpdate, request.SessionTemplates);
-
-            await _dbContext.SessionDayTemplates.AddRangeAsync(sessionDaysUpdate, cancellationToken);
-            await _dbContext.SessionTemplates.AddRangeAsync(sessionTemplatesUpdate, cancellationToken);
+            await _dbContext.SessionTemplateDays.AddRangeAsync(sessionDaysUpdate, cancellationToken);
+            await _dbContext.SessionTemplateTimes.AddRangeAsync(sessionTemplateTimesUpdate, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            var result = new UpdateTimetableTemplateDto(request.StartDate, request.EndDate, request.SessionTemplates,
-                request.PhysicianDataId);
+            var result = new UpdateTimetableTemplateDto
+            (
+                request.StartDate, 
+                request.EndDate, 
+                request.SessionTemplates,
+                request.PhysicianDataId
+            );
+
             return result;
         }
 
@@ -139,6 +153,7 @@ namespace Infrastructure.Persistence.Repositories
             var timetableTemplate = await _dbContext.TimetableTemplates
                     .FirstOrDefaultAsync(t => t.PhysicianDataId == physicianId,
                     cancellationToken);
+
             if (timetableTemplate is null)
             {
                 return false;
@@ -162,12 +177,10 @@ namespace Infrastructure.Persistence.Repositories
             }, cancellationToken);
 
             var sessionDays = CreateSessionDays(request.SessionTemplates, timetableTemplate.Entity.Id);
+            var sessionTemplateTimes = CreateSessionTemplateTimes(sessionDays, request.SessionTemplates);
 
-            var sessionTemplates =
-                CreateSessionTemplates(sessionDays, request.SessionTemplates);
-
-            await _dbContext.SessionDayTemplates.AddRangeAsync(sessionDays, cancellationToken);
-            await _dbContext.SessionTemplates.AddRangeAsync(sessionTemplates, cancellationToken);
+            await _dbContext.SessionTemplateDays.AddRangeAsync(sessionDays, cancellationToken);
+            await _dbContext.SessionTemplateTimes.AddRangeAsync(sessionTemplateTimes, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             var response = new AddTimetableTemplateDto(request.StartDate, request.EndDate, request.SessionTemplates,
@@ -175,7 +188,7 @@ namespace Infrastructure.Persistence.Repositories
             return response;
         }
 
-        private IEnumerable<DateOnly> EnumerateDates(DateOnly start, DateOnly end, List<DayOfWeek> daysOfWeek)
+        private static IEnumerable<DateOnly> EnumerateDates(DateOnly start, DateOnly end, List<DayOfWeek> daysOfWeek)
         {
             for (var date = start; date <= end; date = date.AddDays(1))
             {
@@ -186,12 +199,12 @@ namespace Infrastructure.Persistence.Repositories
             }
         }
 
-        private List<SessionDayTemplate> CreateSessionDays(Dictionary<DayOfWeek, DaySessionsDto> sessionTemplates,
+        private static List<SessionTemplateDay> CreateSessionDays(
+            Dictionary<DayOfWeek, DaySessionsDto> sessionTemplates,
             Guid timetableTemplateId)
         {
-            var sessionDayTemplates = sessionTemplates.Select(pair => new SessionDayTemplate
+            var sessionDayTemplates = sessionTemplates.Select(pair => new SessionTemplateDay
             {
-                Id = Guid.NewGuid(),
                 DayOfWeek = pair.Key,
                 IsActive = pair.Value.IsActive,
                 TimetableTemplateId = timetableTemplateId,
@@ -200,22 +213,25 @@ namespace Infrastructure.Persistence.Repositories
             return sessionDayTemplates;
         }
 
-        private List<SessionTemplate> CreateSessionTemplates(
-            List<SessionDayTemplate> sessionDayTemplates, Dictionary<DayOfWeek, DaySessionsDto> sessionTemplates)
+        private static List<SessionTemplateTimes> CreateSessionTemplateTimes
+        (
+            List<SessionTemplateDay> sessionTemplateDays, 
+            Dictionary<DayOfWeek, DaySessionsDto> sessionTemplates
+        )
         {
-            var createdSessionTemplates = new List<SessionTemplate>();
+            var createdSessionTemplates = new List<SessionTemplateTimes>();
 
-            foreach (var dayTemplate in sessionDayTemplates)
+            foreach (var dayTemplate in sessionTemplateDays)
             {
                 var sessionTimes = sessionTemplates[dayTemplate.DayOfWeek].SessionTimeTemplates;
-                dayTemplate.SessionTemplates = sessionTimes.Select(st => new SessionTemplate
+                dayTemplate.SessionTemplateTimes = sessionTimes.Select(st => new SessionTemplateTimes
                 {
-                    Id = Guid.NewGuid(),
-                    StartTime = TimeOnly.FromDateTime(st.StartTime),
-                    EndTime = TimeOnly.FromDateTime(st.EndTime),
-                    SessionDayTemplateId = dayTemplate.Id
+                    StartTime = TimeZoneInfo.ConvertTimeToUtc(st.StartTime),
+                    EndTime = TimeZoneInfo.ConvertTimeToUtc(st.EndTime),
+                    SessionTemplateDayId = dayTemplate.Id
                 }).ToList();
-                createdSessionTemplates.AddRange(dayTemplate.SessionTemplates);
+
+                createdSessionTemplates.AddRange(dayTemplate.SessionTemplateTimes);
             }
 
             return createdSessionTemplates;
@@ -224,12 +240,12 @@ namespace Infrastructure.Persistence.Repositories
         private async Task<Dictionary<DayOfWeek, DaySessionsDto>> GetTemplatesDictionaryAsync(
             Guid timetableTemplateId, CancellationToken cancellationToken)
         {
-            var sessionDays = await _dbContext.SessionDayTemplates
-                .Include(s => s.SessionTemplates)
+            var sessionDays = await _dbContext.SessionTemplateDays
+                .Include(s => s.SessionTemplateTimes)
                 .Where(s => s.TimetableTemplateId == timetableTemplateId)
                 .ToListAsync(cancellationToken);
 
-            sessionDays.ForEach(sd => sd.SessionTemplates = sd.SessionTemplates.OrderBy(st => st.StartTime).ToList());
+            sessionDays.ForEach(sd => sd.SessionTemplateTimes = sd.SessionTemplateTimes.OrderBy(st => st.StartTime).ToList());
 
             var weeklyTemplates = sessionDays
                 .GroupBy(s => s.DayOfWeek)
@@ -237,17 +253,15 @@ namespace Infrastructure.Persistence.Repositories
                     group => group.Key,
                     group => new DaySessionsDto(
                         group.First().IsActive,
-                        group.SelectMany(s => s.SessionTemplates)
-                            .Select(st => new SessionTimeTemplateDto(
-                                new DateTime(_defaultDateOnly, st.StartTime),
-                                new DateTime(_defaultDateOnly, st.EndTime)))
+                        group.SelectMany(s => s.SessionTemplateTimes)
+                            .Select(st => new SessionTimeTemplateDto(st.StartTime, st.EndTime))
                             .ToList()
                         ));
 
             return weeklyTemplates;
         }
 
-        private bool IsSessionTemplateMatch(
+        private static bool IsSessionTemplateMatch(
             Dictionary<DayOfWeek, DaySessionsDto> sessionTemplates, Session session)
         {
             if (!sessionTemplates.TryGetValue(session.StartTime.DayOfWeek, out var templates))
@@ -263,39 +277,35 @@ namespace Infrastructure.Persistence.Repositories
                 TimeOnly.FromDateTime(template.EndTime) == sessionEndTime);
         }
 
-        private List<SessionTimeTemplateDto> GetAvailableSessionsForDay(DateOnly day, IEnumerable<SessionDayTemplate> sessionDayTemplates, List<Session> sessions)
+        private static List<SessionTimeTemplateDto> GetAvailableSessionsForDay(DateOnly day, IEnumerable<SessionTemplateDay> sessionDayTemplates, List<Session> assignedSessions)
         {
             var availableSessions = new List<SessionTimeTemplateDto>();
+            var sessionTimesTemplates = sessionDayTemplates.Single(t => t.DayOfWeek == day.DayOfWeek).SessionTemplateTimes.ToList();
 
-            var sessionTemplates = sessionDayTemplates.FirstOrDefault(t => t.DayOfWeek == day.DayOfWeek);
-
-            foreach (var template in sessionTemplates.SessionTemplates)
+            foreach (var sessionTimeTemplate in sessionTimesTemplates)
             {
-                if (DateTime.Now < day.ToDateTime(template.StartTime))
+                var templateStartTime = new DateTime(day, TimeOnly.FromDateTime(sessionTimeTemplate.StartTime), DateTimeKind.Utc);
+                var templateEndTime = new DateTime(day, TimeOnly.FromDateTime(sessionTimeTemplate.EndTime), DateTimeKind.Utc);
+
+                var isAvailable = !assignedSessions.Any(s => s.StartTime < templateEndTime && templateStartTime < s.EndTime);
+
+                if (isAvailable)
                 {
-                    var startTime = DateTime.SpecifyKind(day.ToDateTime(template.StartTime), DateTimeKind.Utc);
-                    var endTime = DateTime.SpecifyKind(day.ToDateTime(template.EndTime), DateTimeKind.Utc);
-
-                    var isAvailable = !sessions.Any(s => s.StartTime < endTime && startTime < s.EndTime);
-
-                    if (isAvailable)
-                    {
-                        availableSessions.Add(new SessionTimeTemplateDto(new DateTime(_defaultDateOnly, template.StartTime), new DateTime(_defaultDateOnly, template.EndTime)));
-                    }
+                    availableSessions.Add(new SessionTimeTemplateDto(templateStartTime, templateEndTime));
                 }
             }
 
             return availableSessions;
         }
 
-        private async Task<List<SessionDayTemplate>> GetSessionDayTemplatesAsync(Guid timetableTemplateId, CancellationToken cancellationToken)
+        private async Task<List<SessionTemplateDay>> GetActiveSessionDayTemplatesAsync(Guid timetableTemplateId, CancellationToken cancellationToken)
         {
-            var sessionDays = await _dbContext.SessionDayTemplates
-                .Include(s => s.SessionTemplates)
+            var sessionDays = await _dbContext.SessionTemplateDays
+                .Include(s => s.SessionTemplateTimes)
                 .Where(s => s.TimetableTemplateId == timetableTemplateId && s.IsActive)
                 .ToListAsync(cancellationToken);
 
-            sessionDays.ForEach(sd => sd.SessionTemplates = sd.SessionTemplates.OrderBy(st => st.StartTime).ToList());
+            sessionDays.ForEach(sd => sd.SessionTemplateTimes = sd.SessionTemplateTimes.OrderBy(st => st.StartTime).ToList());
 
             return sessionDays;
         }
@@ -303,15 +313,19 @@ namespace Infrastructure.Persistence.Repositories
         private async Task<PhysicianInfoDto> GetPhysicianInfoAsync(Guid physicianId,
             CancellationToken cancellationToken)
         {
-            var user = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Id==physicianId, cancellationToken);
+            var physician = await _dbContext.PhysicianData
+                .Include(p => p.User)
+                .ThenInclude(u => u.UserPhotoData)
+                .FirstOrDefaultAsync(p => p.UserId == physicianId, cancellationToken);
 
-            var userPhoto = await _dbContext.UserPhotoData
-                .Where(p => p.UserId == physicianId)
-                .Select(p => p.PresignedUrl)
-                .FirstOrDefaultAsync(cancellationToken);
+            var specialties = await _dbContext.PhysicianSpecialties
+                .Where(ps => ps.PhysicianDataId == physicianId)
+                .Include(ps => ps.Position)
+                .Select(ps => new PositionDto(ps.Position.Id, ps.Position.Specialty))
+                .ToListAsync(cancellationToken);
 
-            var result = new PhysicianInfoDto(user.FirstName, user.LastName, user.Patronymic, userPhoto ?? "");
+            var result = new PhysicianInfoDto(physician.User.FirstName, physician.User.LastName,
+                physician.User.Patronymic, physician.User.UserPhotoData?.PresignedUrl ?? "", specialties);
 
             return result;
         }
@@ -319,16 +333,19 @@ namespace Infrastructure.Persistence.Repositories
         private List<SessionTimeTemplateDto> GetDefaultSessions()
         {
             var sessionTemplates = new List<SessionTimeTemplateDto>();
+
             for (int i = 0; i < 5; i++)
             {
-                sessionTemplates.Add(new SessionTimeTemplateDto(
-                    new DateTime(_defaultDateOnly, new TimeOnly(8 + i, 0)),
-                    new DateTime(_defaultDateOnly, new TimeOnly(9 + i, 0))));
+                var startTime = TimeZoneInfo.ConvertTimeToUtc(new DateTime(_defaultDateOnly, new TimeOnly(8 + i, 0)));
+                var endTime = TimeZoneInfo.ConvertTimeToUtc(new DateTime(_defaultDateOnly, new TimeOnly(9 + i, 0)));
+
+                sessionTemplates.Add(new SessionTimeTemplateDto(startTime, endTime));
             }
+
             return sessionTemplates;
         }
 
-        private Dictionary<DayOfWeek, DaySessionsDto> GetDefaultTimetableTemplate(DaySessionsDto daySessions)
+        private static Dictionary<DayOfWeek, DaySessionsDto> GetDefaultTimetableTemplate(DaySessionsDto daySessions)
         {
             return new Dictionary<DayOfWeek, DaySessionsDto>
             {

@@ -2,7 +2,8 @@
 
 namespace Application.Physician.DTOs.ResponseDTOs
 {
-    public record GetPhysicianDataDto(
+    public record GetPhysicianDataDto
+    (
         float? Rating,
         string? Bio,
         bool IsApproved,

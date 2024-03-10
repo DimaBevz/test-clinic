@@ -66,6 +66,9 @@
       "@pages/*": [
         "./pages/*"
       ],
+      "@api/*": [
+        "./share/api/*"
+      ],
     }
   },
   "include": ["src"],

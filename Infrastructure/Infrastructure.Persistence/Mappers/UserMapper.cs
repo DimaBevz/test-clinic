@@ -18,6 +18,8 @@ namespace Infrastructure.Persistence.Mappers
         [MapProperty(nameof(@FileDataDto.ObjectKey), nameof(UserPhotoData.PhotoObjectKey))]
         public static partial UserPhotoData ToUserPhotoData(this FileDataDto source);
 
+        [MapProperty(nameof(@FileDataDto.ObjectKey), nameof(UserPhotoData.PhotoObjectKey))]
+        public static partial void ToCurrentEntity(this FileDataDto source, UserPhotoData dest);
         public static partial void ToCurrentEntity(this UpdateUserDto source, User dest);
 
         [MapProperty(nameof(UserPhotoData.PhotoObjectKey), nameof(FileDataDto.ObjectKey))]

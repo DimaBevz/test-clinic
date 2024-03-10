@@ -4,6 +4,14 @@ export enum Role {
   Admin ,
 }
 
+export enum DisabilityCategory {
+  MusculoskeletalSystemDisorders,
+  IntellectualAndPsychoDisorders,
+  HearingImpairment,
+  VisualImpairment,
+  InternalOrgansDisorders,
+}
+
 export interface IAuthData {
   id: string
   email: string

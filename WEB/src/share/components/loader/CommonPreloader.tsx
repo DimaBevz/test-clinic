@@ -5,5 +5,5 @@ export interface PreloaderProps {
 }
 
 export const CommonPreloader = ({size}: PreloaderProps) => {
-  return <Spinner color="#DD6B20" speed="0.65s" size={size} />;
+  return <Spinner color="#ECC94B" speed="0.65s" size={size} />;
 };

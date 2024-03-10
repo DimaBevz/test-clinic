@@ -1,9 +1,11 @@
-﻿using Application.Common.Interfaces.Repositories;
+﻿using Application.Common.Enums;
+using Application.Common.Interfaces.Repositories;
 using Application.Session.DTOs.Request;
 using Application.Session.DTOs.Response;
 using Infrastructure.Persistence.Entities;
 using Infrastructure.Persistence.Mappers;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -29,15 +31,21 @@ namespace Infrastructure.Persistence.Repositories
                 return null;
             }
 
+            var sessionId = Guid.NewGuid();
             var session = new Session
             {
-                Id = Guid.NewGuid(),
+                Id = sessionId,
                 StartTime = startTime,
                 EndTime = endTime,
                 MeetingId = meetingId,
                 PhysicianDataId = request.PhysicianId,
-                PatientDataId = patientId
+                PatientDataId = patientId,
+                MeetingHistory = new MeetingHistory
+                {
+                    SessionId = sessionId
+                }
             };
+
             var details = new SessionDetail
             {
                 SessionId = session.Id,
@@ -65,26 +73,30 @@ namespace Infrastructure.Persistence.Repositories
                 return null;
             }
 
-            var sessionsInstances = await _dbContext.Sessions
-                .Include(s => s.PatientData)
-                .ThenInclude(ps => ps.User)
-                .Include(s => s.PhysicianData)
-                .ThenInclude(p => p.User)
-                .Include(s => s.SessionDetail)
-                .ThenInclude(sd => sd != null ? sd.Diagnosis : null)
-                .Where(s =>
-                    (!request.PhysicianId.HasValue || s.PhysicianDataId == request.PhysicianId.Value) &&
-                    (!request.PatientId.HasValue || s.PatientDataId == request.PatientId.Value) &&
-                    (!request.StartTime.HasValue || s.StartTime >= request.StartTime.Value.Date) &&
-                    (!request.EndTime.HasValue || s.EndTime <= request.EndTime.Value.Date.AddDays(1).AddTicks(-1)) &&
-                    (!request.ShowArchived.HasValue || s.IsArchived == request.ShowArchived) &&
-                    (!request.ShowDeleted.HasValue || s.IsDeleted == request.ShowDeleted)
-                )
-                .ToListAsync(cancellationToken);
+            var sessionsInstances = GetQueryableSessions(request.PhysicianId, request.PatientId, request.StartTime,
+                request.EndTime);
 
-            var sessions = sessionsInstances.OrderBy(s => s.StartTime)
-                .Select(CreateSessionItem)
-                .ToList();
+            switch (request.SortType)
+            {
+                case SessionSortType.Active:
+                    sessionsInstances = sessionsInstances
+                        .Where(s => !s.IsArchived && !s.IsDeleted);
+                    break;
+                case SessionSortType.All:
+                    break;
+                case SessionSortType.Archived:
+                    sessionsInstances = sessionsInstances
+                        .Where(s => s.IsArchived);
+                    break;
+                default:
+                    sessionsInstances = sessionsInstances
+                        .Where(s => !s.IsArchived && !s.IsDeleted);
+                    break;
+            }
+
+            var sessions = await sessionsInstances.OrderBy(s => s.StartTime)
+                .Select(s => CreateSessionItem(s))
+                .ToListAsync(cancellationToken);
 
             var resultSessionList = new List<SessionItemDto>();
 
@@ -99,6 +111,48 @@ namespace Infrastructure.Persistence.Repositories
 
             var response = new GetSessionsResponseDto(resultSessionList);
             return response;
+        }
+
+        public async Task<GetPaginatedSessionsDto> GetSessionsByParamsAsync(GetSessionsByParamsDto request, CancellationToken cancellationToken)
+        {
+            if (!request.PhysicianId.HasValue && !request.PatientId.HasValue)
+            {
+                return null;
+            }
+
+            var query = GetQueryableSessions(request.PhysicianId, request.PatientId, request.StartTime,
+                request.EndTime);
+
+            switch (request.SortType)
+            {
+                case SessionSortType.Active:
+                    query = query
+                        .Where(s => !s.IsArchived && !s.IsDeleted);
+                    break;
+                case SessionSortType.All:
+                    break;
+                case SessionSortType.Archived:
+                    query = query
+                        .Where(s => s.IsArchived);
+                    break;
+                default:
+                    query = query
+                        .Where(s => !s.IsArchived && !s.IsDeleted);
+                    break;
+            }
+
+            var sessionCount = query.Count();
+
+            var sessionItems = await query
+                .OrderBy(s => s.StartTime)
+                .Skip(request.Limit * (request.Page - 1))
+                .Take(request.Limit)
+                .Select(s => CreateSessionItem(s))
+                .ToListAsync(cancellationToken);
+
+            var result = new GetPaginatedSessionsDto(sessionItems, sessionCount);
+
+            return result;
         }
 
         public async Task<SessionDetailsDto> GetSessionByIdAsync(Guid sessionId, CancellationToken cancellationToken)
@@ -147,10 +201,11 @@ namespace Infrastructure.Persistence.Repositories
             var diagnosis = request.ToDiagnosis();
 
             var diagnosisInstance = await _dbContext.SessionDetails
+                .Include(d => d.Diagnosis)
                 .FirstOrDefaultAsync(d => d.SessionId == sessionDetails.SessionId, cancellationToken);
-            var diagnosisId = diagnosisInstance?.DiagnosisId ?? Guid.Empty;
+            var diagnosisId = diagnosisInstance?.DiagnosisId;
 
-            var diagnosisUpdate = await UpdateDiagnosisAsync(diagnosis, diagnosisId, cancellationToken);
+            var diagnosisUpdate = await UpdateDiagnosisAsync(diagnosis, diagnosisId, diagnosisInstance?.Diagnosis, cancellationToken);
 
             var updatedDetails = await UpdateSessionDetailsAsync(sessionDetails, diagnosisUpdate, cancellationToken);
 
@@ -314,19 +369,25 @@ namespace Infrastructure.Persistence.Repositories
                    && !string.IsNullOrEmpty(detailsUpdate.Recommendations);
         }
 
-        private async Task<Guid> UpdateDiagnosisAsync(Diagnosis diagnosis, Guid diagnosisId, CancellationToken cancellationToken)
+        private async Task<Guid?> UpdateDiagnosisAsync(Diagnosis diagnosis, Guid? diagnosisId, Diagnosis? diagnosisSource, CancellationToken cancellationToken)
         {
             if (!string.IsNullOrEmpty(diagnosis.Title))
             {
-                if (diagnosisId != Guid.Empty)
+                if (diagnosisId.HasValue)
                 {
-                    diagnosis.Id = diagnosisId;
-                    _dbContext.Diagnoses.Update(diagnosis);
+                    diagnosis.Id = diagnosisId.Value;
+                    diagnosisSource.Title = diagnosis.Title;
+                    _dbContext.Diagnoses.Update(diagnosisSource);
                     return diagnosis.Id;
                 }
                 diagnosis.Id = Guid.NewGuid();
                 await _dbContext.Diagnoses.AddAsync(diagnosis, cancellationToken);
                 return diagnosis.Id;
+            }
+
+            if (diagnosisId.HasValue)
+            {
+                diagnosis.Title = diagnosisSource.Title;
             }
 
             return diagnosisId;
@@ -375,7 +436,25 @@ namespace Infrastructure.Persistence.Repositories
             return result;
         }
 
-        private SessionItemDto CreateSessionItem(Session session)
+        private IQueryable<Session> GetQueryableSessions(Guid? physicianId, Guid? patientId, DateTime? startTime, DateTime? endTime)
+        {
+            return _dbContext.Sessions
+                .Include(s => s.PatientData)
+                .ThenInclude(ps => ps.User)
+                .Include(s => s.PhysicianData)
+                .ThenInclude(p => p.User)
+                .Include(s => s.SessionDetail)
+                .ThenInclude(sd => sd != null ? sd.Diagnosis : null)
+                .Where(s =>
+                    (!physicianId.HasValue || s.PhysicianDataId == physicianId.Value) &&
+                    (!patientId.HasValue || s.PatientDataId == patientId.Value) &&
+                    (!startTime.HasValue || s.StartTime >= startTime.Value.Date) &&
+                    (!endTime.HasValue || s.EndTime <= endTime.Value.Date.AddDays(1).AddTicks(-1))
+                )
+                .AsQueryable();
+        }
+
+        private static SessionItemDto CreateSessionItem(Session session)
         {
             var physician = new UserInfoDto(session.PhysicianData.User.Id, session.PhysicianData.User.LastName,
                 session.PhysicianData.User.FirstName, session.PhysicianData.User.Patronymic);

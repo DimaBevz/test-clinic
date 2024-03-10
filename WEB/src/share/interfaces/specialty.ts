@@ -1,4 +1,4 @@
-export interface Specialty {
+export interface ISpecialty {
 	id: string
 	specialty: string
 }

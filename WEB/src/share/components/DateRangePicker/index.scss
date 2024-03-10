@@ -1,13 +1,12 @@
 .DateRangePicker {
+  min-width: 245px;
   &__label {
     color: #808086;
     font-size: 14px !important;
     font-weight: 400;
   }
 }
-.rs-btn-primary {
-  background-color: #3498ff !important;
-}
+
 .rs-picker-daterange input:hover {
   box-shadow: none;
   transform: none;

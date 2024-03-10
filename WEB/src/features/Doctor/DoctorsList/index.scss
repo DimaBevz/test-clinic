@@ -1,0 +1,19 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.page-item.active > a {
+  background-color: var(--chakra-colors-yellow-400) !important;
+  border-color: var(--chakra-colors-yellow-400) !important;
+}
+
+.pagination .page-link {
+  color: black !important;
+  font-weight: var(--chakra-fontWeights-semibold);
+}

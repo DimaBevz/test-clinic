@@ -49,7 +49,7 @@ public class CreateCallHandler : IRequestHandler<CreateCallCommand, string>
         return await _callService.GetCallToken(new CreateCallDto
         {
             Name = $"{user.FirstName} {user.LastName}",
-            MeetingId = meetingId.ToString(),
+            MeetingId = meetingId.ToString()!,
             Picture = user.PhotoUrl,
             IsHost = user.Role == RoleType.Physician,
             UserId = _currentUserService.UserId

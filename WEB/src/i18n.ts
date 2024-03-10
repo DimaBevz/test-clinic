@@ -9,7 +9,7 @@ const resources = {
 	en: {
 		translation: enTranslation,
 	},
-	uk: {
+	"uk-UA": {
 		translation: ukTranslation,
 	},
 };
@@ -20,6 +20,7 @@ i18n
 	.init({
 		resources,
 		fallbackLng: "en",
+		lng: "en",
 		debug: true,
 		
 		interpolation: {

@@ -1,0 +1,27 @@
+.Landing {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  overflow-y: auto;
+  padding-bottom: 30px;
+  &__MainInfo {
+    columns: 450px auto;
+    column-gap: 20px;
+    max-width: 1260px;
+    p {
+      padding-bottom: 15px;
+    }
+
+    ul {
+      li {
+        font-size: 17px;
+        &::marker {
+          color: #ffc40c !important;
+        }
+      }
+    }
+  }
+}

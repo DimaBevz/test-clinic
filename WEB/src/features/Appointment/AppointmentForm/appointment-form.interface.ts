@@ -1,5 +1,5 @@
-import { DoctorsFullModel } from "@interfaces/doctor";
-import { PatientsFullModel } from "@interfaces/patient";
+import { IDoctorsFullModel } from "@interfaces/doctor";
+import { IPatientsFullModel } from "@interfaces/patient";
 
 export interface IAppointmentFormInput {
   date: string;
@@ -42,8 +42,8 @@ export interface IAppointmentInfo {
   id: string;
   startTime: Date;
   endTime: Date;
-  physician: DoctorsFullModel;
-  patient: PatientsFullModel;
+  physician: IDoctorsFullModel;
+  patient: IPatientsFullModel;
   currentPainScale: number;
   averagePainScaleLastMonth: number;
   highestPainScaleLastMonth: number;

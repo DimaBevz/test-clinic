@@ -1,42 +1,31 @@
-import { useEffect } from "react";
-import { useLazyGetSessionInfoQuery } from "../AppointmentForm/appointment-form.service";
-import { useToast } from "@hooks/useToast";
-import { useParams } from "react-router-dom";
-import { ApiError } from "@interfaces/general";
+import { useNavigate } from "react-router-dom";
+import { useAppointmentInfo } from "@hooks/appointment/useAppointmentInfo.ts";
+import { useTestsResultList } from "@hooks/tests/useTestsResultList.ts";
 
-function useAppointmentInfoController() {
-  const { errorToast } = useToast();
-  const { id } = useParams();
-  const [
-    getSessionInfoQuery,
-    {
-      data: getSessionInfoData,
-      isLoading: isGetSessionInfoLoading,
-      isError: isGetSessionInfoError,
-      error: getSessionInfoError,
-    },
-  ] = useLazyGetSessionInfoQuery();
+interface IProps {
+	id?: string;
+}
 
-  useEffect(() => {
-    if (id) {
-      getSessionInfoQuery(id);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (isGetSessionInfoError) {
-      errorToast((getSessionInfoError as ApiError)?.data?.title as string);
-    }
-  }, [isGetSessionInfoError]);
-
-  return {
-    getSessionInfo: {
-      data: getSessionInfoData,
-      isLoading: isGetSessionInfoLoading,
-      isError: isGetSessionInfoError,
-      error: getSessionInfoError,
-    },
-  };
+function useAppointmentInfoController({ id }: IProps) {
+	const navigate = useNavigate();
+	const { sessionInfoData, isSessionInfoLoading } = useAppointmentInfo({
+		appointmentId: id as string,
+	});
+	const { testsListResult, isTestsListResultLoading } = useTestsResultList({
+		patientId: sessionInfoData?.patient.id,
+	});
+	
+	return {
+		navigate,
+		session: {
+			sessionInfoData,
+			isSessionInfoLoading,
+		},
+		tests: {
+			testsListResult,
+			isTestsListResultLoading,
+		},
+	};
 }
 
 export default useAppointmentInfoController;

@@ -29,7 +29,7 @@ namespace Infrastructure.Services
         {
             var signUpRequest = new ConfirmSignUpRequest
             {
-                ClientId = _awsOptions.ClientId,
+                ClientId = _awsOptions.UserPoolClientId,
                 ConfirmationCode = dto.Code,
                 Username = dto.Email,
             };
@@ -58,7 +58,7 @@ namespace Infrastructure.Services
 
         public async Task<TokenDto> LoginAsync(AuthCredentialsDto credentials)
         {
-            var user = new CognitoUser(credentials.Email, _awsOptions.ClientId, _userPool, _identityProvider);
+            var user = new CognitoUser(credentials.Email, _awsOptions.UserPoolClientId, _userPool, _identityProvider);
             var authRequest = new InitiateSrpAuthRequest
             {
                 Password = credentials.Password
@@ -81,7 +81,7 @@ namespace Infrastructure.Services
             var request = new SignUpRequest
             {
                 Username = registerDto.Email,
-                ClientId = _awsOptions.ClientId,
+                ClientId = _awsOptions.UserPoolClientId,
                 Password = registerDto.Password,
                 UserAttributes = new List<AttributeType>
                     {

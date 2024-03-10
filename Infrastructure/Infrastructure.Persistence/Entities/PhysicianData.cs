@@ -12,7 +12,8 @@ namespace Infrastructure.Persistence.Entities
         public float Rating { get; set; }
         public string? Bio { get; set; }
 
-        public bool IsApproved { get; set; }
+        public bool IsApproved { get; set; } = true;
+        public ApproveDocumentMessage? ApproveDocumentMessage { get; set; } = null!;
 
         public List<Position>? Positions { get; set; }
         public List<PhysicianSpecialty> PhysicianSpecialties { get; set; } = null!;

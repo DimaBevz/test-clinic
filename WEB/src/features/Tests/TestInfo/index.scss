@@ -1,0 +1,63 @@
+.TestInfo {
+  &__name {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  &__content {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__counter {
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+  }
+
+  &__current-question {
+    color: #ECC94B;
+  }
+
+  &__test {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__answer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__verdict {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  &__verdict-score {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  input[type="radio"] {
+    accent-color: #232323;
+  }
+}

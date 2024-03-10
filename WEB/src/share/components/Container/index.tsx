@@ -3,11 +3,11 @@ import { ReactNode } from "react";
 
 import "./index.scss";
 
-interface CustomContainerProps {
+interface ContainerProps {
   children: ReactNode;
   [key: string]: any;
 }
 
-export const CustomContainer = ({ children, ...props }: CustomContainerProps) => {
+export const Container = ({ children, ...props }: ContainerProps) => {
   return <Stack className="CustomContainer" gap={5} {...props}>{children}</Stack>;
 };

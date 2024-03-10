@@ -1,4 +1,4 @@
-import { ISessionTemplate, ISessionTemplateFormValues, ITimeSlot } from "@features/TimeTable/TimeTableForm/time-table-form.interface";
+import { ISessionTemplate, ISessionTemplateFormValues, ITimeSlot } from "@features/Doctor/TimeTable/TimeTableForm/time-table-form.interface";
 import dayjs from "dayjs";
 
 export const parseSessionTemplates = (

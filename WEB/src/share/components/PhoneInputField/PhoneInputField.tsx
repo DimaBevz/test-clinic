@@ -13,7 +13,7 @@ export const PhoneInputField = ( { label, ...props }: any ) => {
 				{ ...props }
 				{ ...field }
 				value={ field.value }
-				color="orange"
+				color="yellow"
 				defaultCountry="ua"
 				style={ {
 					width: "100%",

@@ -1,0 +1,32 @@
+.AppointmentInfo {
+  &__test-block {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__test-card-container {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  &__test-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  &__test-card-content {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  &__conclusion-label {
+    font-weight: 600;
+  }
+}

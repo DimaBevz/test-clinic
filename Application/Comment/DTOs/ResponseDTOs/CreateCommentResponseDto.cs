@@ -1,10 +1,12 @@
 ﻿namespace Application.Comment.DTOs.ResponseDTOs;
 
-public record CreateCommentResponseDto(
+public record CreateCommentResponseDto
+(
     Guid Id, 
     Guid AuthorId, 
     string CommentText, 
     float Rating, 
     DateTime CreatedAt, 
     string FirstName, 
-    string LastName);
+    string LastName
+);

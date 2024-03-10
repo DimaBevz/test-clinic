@@ -6,7 +6,7 @@ namespace Application.Common.Interfaces.Services
     public interface IFileService
     {
         public Task<FileDataDto> UpdatePresignedLinkAsync(string fileObjectKey);
-        public Task<FileDataDto?> UploadFileAsync(
+        public Task<FileDataDto> UploadFileAsync(
             Stream fileStream, 
             string contentType, 
             FolderName folderName, 

@@ -36,6 +36,16 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
+        [HttpPost]
+        [ProducesResponseType(typeof(ApiResponse<GetPaginatedSessionsDto>), 200)]
+        public async Task<IActionResult> GetSessionsByParams(GetSessionsByParamsDto requestDto)
+        {
+            var result = await _mediator.Send(new GetSessionsByParamsQuery(requestDto));
+
+            var response = result.ToApiResponse();
+            return Ok(response);
+        }
+
         [HttpGet("{sessionId}")]
         [ProducesResponseType(typeof(ApiResponse<SessionDetailsDto>), 200)]
         public async Task<IActionResult> GetSessionById([FromRoute] Guid sessionId)

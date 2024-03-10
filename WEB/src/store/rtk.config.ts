@@ -5,8 +5,6 @@ import { Schema } from "yup";
 
 import httpClient from "@http-client/index";
 
-import API_CONFIG from "@configs/api";
-
 import { ApiError } from "@interfaces/general";
 
 import { createAPIError, isProd, validateServerResponse } from "@utils/index";
@@ -93,9 +91,7 @@ const axiosBaseQuery =
     }
   };
 
-const baseAxiosQuery = axiosBaseQuery({
-  baseURL: API_CONFIG.BASE_URL,
-});
+const baseAxiosQuery = axiosBaseQuery({ baseURL: "" });
 
 const baseQueryWithRetry = retry(baseAxiosQuery, { maxRetries: 2 });
 
@@ -116,6 +112,8 @@ const api = createApi({
     "call",
     "session-archive-status",
     "specialities",
+    "tests",
+    "tests-result",
   ],
   endpoints: () => ({}),
 });

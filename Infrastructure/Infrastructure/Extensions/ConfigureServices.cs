@@ -19,12 +19,12 @@ public static class ConfigureServices
     {
         var awsOptions = new AWSOptions
         {
-            Region = RegionEndpoint.GetBySystemName(configuration["AWS:Region"]),
-            Credentials = new BasicAWSCredentials(configuration["AWS:AccessKey"], configuration["AWS:SecretKey"])
+            Credentials = new EnvironmentVariablesAWSCredentials()
         };
 
+        services.AddDefaultAWSOptions(awsOptions);
         services.AddCognitoIdentity();
-        services.AddAWSService<IAmazonS3>(awsOptions);
+        services.AddAWSService<IAmazonS3>();
 
         services.AddScoped<ICallService, CallService>();
         services.AddScoped<IAuthService, CognitoAuthService>();

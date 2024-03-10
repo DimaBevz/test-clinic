@@ -89,6 +89,7 @@ public static class ConfigureServices
                     RoleClaimType = "custom:role"
                 };
             });
+
         services.AddAuthorization();
 
         return services;

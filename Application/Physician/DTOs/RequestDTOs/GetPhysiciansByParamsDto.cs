@@ -8,8 +8,10 @@ namespace Application.Physician.DTOs.RequestDTOs
         int Limit,
         bool IsAscending,
         bool? IsApproved,
-        string? PhysicianName,
-        Guid? PositionId,
-        SortField? SortField
+        string? Search,
+        SortField? SortField,
+        List<UserGender>? Sex,
+        List<EvaluationType>? Rating,
+        int? Experience
     );
 }

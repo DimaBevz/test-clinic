@@ -13,15 +13,15 @@ namespace WebApi.Filters
         {
             if (context.Exception is Exception exception)
             {
-                HandleException(context, exception, StatusCodes.Status400BadRequest, "Something went wrong!");
+                HandleException(context, exception, StatusCodes.Status400BadRequest);
             }
             else if (context.Exception is DbUpdateException dbException)
             {
-                HandleException(context, dbException, StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+                HandleException(context, dbException, StatusCodes.Status500InternalServerError);
             }
         }
 
-        private static void HandleException<T>(ExceptionContext context, T exception, int statusCode, string message) 
+        private static void HandleException<T>(ExceptionContext context, T exception, int statusCode) 
             where T : Exception
         {
             var details = new ValidationProblemDetails
@@ -35,7 +35,6 @@ namespace WebApi.Filters
             var response = new ApiResponse<ValidationProblemDetails>
             {
                 IsSuccess = false,
-                Message = message,
                 Data = details
             };
 

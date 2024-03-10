@@ -11,6 +11,7 @@ namespace Infrastructure.Persistence
         {
         }
 
+        public DbSet<ApproveDocumentMessage> ApproveDocumentMessages { get; set; } = null!;
         public DbSet<Diagnosis> Diagnoses { get; set; } = null!;
         public DbSet<Document> Documents { get; set; } = null!;
         public DbSet<PatientData> PatientData { get; set; } = null!;
@@ -22,17 +23,21 @@ namespace Infrastructure.Persistence
         public DbSet<Position> Positions { get; set; } = null!;
         public DbSet<UserPhotoData> UserPhotoData { get; set; } = null!;
         public DbSet<TimetableTemplate> TimetableTemplates { get; set; } = null!;
-        public DbSet<SessionDayTemplate> SessionDayTemplates { get; set; } = null!;
-        public DbSet<SessionTemplate> SessionTemplates { get; set; } = null!;
+        public DbSet<SessionTemplateDay> SessionTemplateDays { get; set; } = null!;
+        public DbSet<SessionTemplateTimes> SessionTemplateTimes { get; set; } = null!;
         public DbSet<ChatHistory> ChatHistories { get; set; } = null!;
         public DbSet<PhysicianSpecialty> PhysicianSpecialties { get; set; } = null!;
         public DbSet<Test> Tests { get; set; } = null!;
+        public DbSet<MilitaryData> MilitaryData { get; set; } = null!;
         public DbSet<TestQuestion> TestsQuestions { get; set; } = null!;
         public DbSet<TestOption> TestOptions { get; set; } = null!;
         public DbSet<TestResult> TestResults { get; set; } = null!;
         public DbSet<TestResultDetail> TestResultDetails { get; set; } = null!;
         public DbSet<TestCriteria> TestCriteria { get; set; } = null!;
- 
+        public DbSet<MeetingHistory> MeetingHistory { get; set; } = null!;
+        public DbSet<BugReport> BugReports { get; set; } = null!;
+        public DbSet<BugReportPhoto> BugReportPhotos { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

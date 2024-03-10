@@ -1,8 +1,12 @@
-import React from "react";
-
 export type SVGComponent = React.FC<React.SVGProps<SVGSVGElement>> & {
   title?: string;
 };
+
+export interface IResponse {
+  isSuccess: boolean;
+  message: null | string;
+  data: any;
+}
 
 export interface ApiError {
   data: {

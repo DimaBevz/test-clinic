@@ -6,53 +6,66 @@ import "./index.css";
 import ProtectedRoute from "./routes/ProtectedRoute.tsx";
 import { theme } from "../theme.ts";
 import "./i18n.ts";
-import { LoginForm } from "@pages/Login/Login.tsx";
 import { persistor, store } from "@store/index.ts";
 import { PersistGate } from "redux-persist/integration/react";
 import { Provider } from "react-redux";
 import { Role } from "@interfaces/IAuth.ts";
-import { ChangePassword } from "@pages/ChangePassword/ChangePassword.tsx";
-import { Registration } from "@pages/Registration/Registration.tsx";
-import { ProfilePage } from "@pages/Profile/index.tsx";
 import { MainLayout } from "@components/MainLayout/index.tsx";
 import { injectStoreToHttpClient } from "@http-client/index.ts";
-import { ConfirmUser } from "@pages/ConfirmUser/ConfirmUser.tsx";
-import { TimeTable } from "@pages/TimeTable/index.tsx";
-import { BugPage, DoctorPage, Help, NoAccess } from "@pages/index.ts";
-import DoctorsList from "@pages/DoctorsList";
-import { AppointmentFormPage } from "@pages/AppointmentFormPage/index.tsx";
-import { AppointmentListPage } from "@pages/AppointmentListPage/index.tsx";
-import { AppointmentInfoPage } from "@pages/AppointmentInfoPage/index.tsx";
-import { AppointmentCall } from "@features/Appointment/AppointmentCall/index.tsx";
-import Home from "@pages/Home";
-import LandingPage from "@pages/LandingPage";
+import {
+  BugPage,
+  DoctorInfoPage,
+  HelpPage,
+  NoAccessPage,
+  DoctorsListPage,
+  AppointmentCallPage,
+  AppointmentFormPage,
+  AppointmentInfoPage,
+  AppointmentListPage,
+  ChangePasswordPage,
+  ConfirmUserPage,
+  LoginPage,
+  RegistrationPage,
+  TimeTablePage,
+  TestsListPage,
+  TestInfoPage,
+  LandingPage,
+  ProfilePage,
+  AboutUs,
+  OurTeam,
+} from "@pages/index.ts";
 
 injectStoreToHttpClient(store);
 
 const router = createBrowserRouter([
+  { index: true, element: <LandingPage /> },
   {
     path: "/403",
-    element: <NoAccess text="У вас немає доступу до цієї сторінки" />,
+    element: <NoAccessPage text="У вас немає доступу до цієї сторінки" />,
   },
-	{
-		path: "/home",
-		element: <LandingPage/>,
-	},
   {
     path: "/login",
-    element: <LoginForm />,
+    element: <LoginPage />,
   },
   {
     path: "/registration",
-    element: <Registration />,
+    element: <RegistrationPage />,
   },
   {
     path: "/confirmation",
-    element: <ConfirmUser />,
+    element: <ConfirmUserPage />,
   },
   {
     path: "/change-password",
-    element: <ChangePassword />,
+    element: <ChangePasswordPage />,
+  },
+  {
+    path: "/about-us",
+    element: <AboutUs />,
+  },
+  {
+    path: "/our-team",
+    element: <OurTeam />,
   },
   {
     path: "/",
@@ -77,7 +90,7 @@ const router = createBrowserRouter([
           <ProtectedRoute
             roles={[Role.Doctor]}
             elementsMapping={{
-              "1": <TimeTable />,
+              "1": <TimeTablePage />,
             }}
           />
         ),
@@ -112,82 +125,97 @@ const router = createBrowserRouter([
           <ProtectedRoute
             roles={[Role.Patient, Role.Doctor]}
             elementsMapping={{
-              "0": <AppointmentCall />,
-              "1": <AppointmentCall />,
+              "0": <AppointmentCallPage />,
+              "1": <AppointmentCallPage />,
             }}
           />
         ),
       },
       {
-				path: "/doctors/:id",
-				element: <ProtectedRoute
-					roles={ [ Role.Patient, Role.Doctor, Role.Admin ] }
-					elementsMapping={ {
-						"0": <DoctorPage/>,
-						"1": <DoctorPage/>,
-						"2": <>home admin</>,
-					} }
-				/>
-			},
-      {
-				path: "/doctors",
-				element: <ProtectedRoute
-					roles={ [ Role.Patient, Role.Doctor, Role.Admin ] }
-					elementsMapping={ {
-						"0": <DoctorsList/>,
-						"1": <DoctorsList/>,
-						"2": <>home admin</>,
-					} }
-				/>,
-			},
-      {
-				path: "/doctors/appointment/:id",
-				element: <ProtectedRoute
-					roles={ [ Role.Patient ] }
-					elementsMapping={ {
-						"0": <AppointmentFormPage/>,
-					} }
-				/>,
-			},
-      {
-				path: "/",
+        path: "/doctors/:id",
         element: (
           <ProtectedRoute
             roles={[Role.Patient, Role.Doctor, Role.Admin]}
             elementsMapping={{
-							"0": <Home/>,
-							"1": <Home/>,
-							"2": <Home/>,
+              "0": <DoctorInfoPage />,
+              "1": <DoctorInfoPage />,
+              "2": <>home admin</>,
             }}
           />
         ),
       },
-			{
-				path: "/help",
-				element: (
-					<ProtectedRoute
-						roles={ [ Role.Patient, Role.Doctor, Role.Admin ] }
-						elementsMapping={ {
-							"0": <Help/>,
-							"1": <Help/>,
-							"2": <Help/>,
-						} }
-					/>
-				),
-			},
-			{
-				path: "/report-bug",
-				element: (
-					<ProtectedRoute
-						roles={ [ Role.Patient, Role.Doctor, Role.Admin ] }
-						elementsMapping={ {
-							"0": <BugPage/>,
-							"1": <BugPage/>,
-							"2": <BugPage/>,
-						} }
-					/>
-				),
-			},
+      {
+        path: "/doctors",
+        element: (
+          <ProtectedRoute
+            roles={[Role.Patient, Role.Doctor, Role.Admin]}
+            elementsMapping={{
+              "0": <DoctorsListPage />,
+              "1": <DoctorsListPage />,
+              "2": <>home admin</>,
+            }}
+          />
+        ),
+      },
+      {
+        path: "/doctors/appointment/:id",
+        element: (
+          <ProtectedRoute
+            roles={[Role.Patient]}
+            elementsMapping={{
+              "0": <AppointmentFormPage />,
+            }}
+          />
+        ),
+      },
+      {
+        path: "/help",
+        element: (
+          <ProtectedRoute
+            roles={[Role.Patient, Role.Doctor, Role.Admin]}
+            elementsMapping={{
+              "0": <HelpPage />,
+              "1": <HelpPage />,
+              "2": <HelpPage />,
+            }}
+          />
+        ),
+      },
+      {
+        path: "/report-bug",
+        element: (
+          <ProtectedRoute
+            roles={[Role.Patient, Role.Doctor, Role.Admin]}
+            elementsMapping={{
+              "0": <BugPage />,
+              "1": <BugPage />,
+              "2": <BugPage />,
+            }}
+          />
+        ),
+      },
+      {
+        path: "/tests",
+        element: (
+          <ProtectedRoute
+            roles={[Role.Patient]}
+            elementsMapping={{
+              "0": <TestsListPage />,
+            }}
+          />
+        ),
+      },
+      {
+        path: "/tests/:id",
+        element: (
+          <ProtectedRoute
+            roles={[Role.Patient]}
+            elementsMapping={{
+              "0": <TestInfoPage />,
+            }}
+          />
+        ),
+      },
     ],
   },
 ]);

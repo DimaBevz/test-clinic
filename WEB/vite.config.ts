@@ -86,6 +86,10 @@ export default defineConfig(({ mode }) => {
           find: '@http-client',
           replacement: path.resolve(__dirname, 'src/share/http-client'),
         },
+        {
+          find: '@api',
+          replacement: path.resolve(__dirname, 'src/share/api'),
+        },
       ],
     },
   };

@@ -1,11 +1,11 @@
 import { IAuthData } from "@interfaces/IAuth.ts";
-import { Specialty } from "@interfaces/specialty.ts";
+import { ISpecialty } from "@interfaces/specialty.ts";
 
-export interface DoctorsPartialModel {
+export interface IDoctorsPartialModel {
 	experience: any
 	rating: number
 	bio: any
-	positions: Specialty[]
+	positions: ISpecialty[]
 }
 
 export interface IDoctorListModel {
@@ -13,12 +13,12 @@ export interface IDoctorListModel {
 	firstName: string
 	lastName: string
 	patronymic: string
-	photoUrl: any
+	photoUrl: string | null
 	experience: any
 	rating: number
-	positions: Specialty[]
+	positions: ISpecialty[]
 	commentsCount: number
 	bio: any
 }
 
-export interface DoctorsFullModel extends IAuthData, DoctorsPartialModel{}
+export interface IDoctorsFullModel extends IAuthData, IDoctorsPartialModel{}

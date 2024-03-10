@@ -9,6 +9,8 @@ namespace Application.Physician.DTOs.ResponseDTOs
         string LastName,
         string? Patronymic,
         string? PhotoUrl,
+        string? PhotoObjectKey,
+        DateTime? PhotoExpiration,
         float? Rating,
         string? Bio,
         bool IsApproved,

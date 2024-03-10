@@ -43,6 +43,8 @@ namespace Infrastructure.Persistence.Mappers
         [MapProperty(nameof(@PhysicianData.User.LastName), nameof(PhysicianItemDto.LastName))]
         [MapProperty(nameof(@PhysicianData.User.Patronymic), nameof(PhysicianItemDto.Patronymic))]
         [MapProperty(nameof(@PhysicianData.User.UserPhotoData.PresignedUrl), nameof(PhysicianItemDto.PhotoUrl))]
+        [MapProperty(nameof(@PhysicianData.User.UserPhotoData.ExpiresAt), nameof(PhysicianItemDto.PhotoExpiration))]
+        [MapProperty(nameof(@PhysicianData.User.UserPhotoData.PhotoObjectKey), nameof(PhysicianItemDto.PhotoObjectKey))]
         [MapperIgnoreSource(nameof(PhysicianData.Experience))]
         public static partial PhysicianItemDto MapPhysicianDataToPhysicianItemDto(this PhysicianData source);
 

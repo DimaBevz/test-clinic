@@ -1,0 +1,34 @@
+.Main {
+  width: 100%;
+  height: 100vh;
+  background-image: url("../../../share/assets/img/young-doctor.jpg");
+  background-size: cover;
+  padding-bottom: 10px;
+
+  &__form {
+    margin-left: calc(23% - 150px);
+    margin-top: 10vh;
+    @media (max-width: 767px) {
+      margin: 15vh auto 0;
+    }
+  }
+
+  &__show-icon {
+    color: #000 !important;
+  }
+
+  &__phone {
+    .react-international-phone-input {
+      width: 84%;
+    }
+  }
+
+  &__checkbox {
+    display: flex;
+
+    & > label:nth-child(2) {
+      margin: 0;
+      margin-inline-start: 0.5rem;
+    }
+  }
+}

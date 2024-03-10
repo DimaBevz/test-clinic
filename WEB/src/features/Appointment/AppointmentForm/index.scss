@@ -7,15 +7,14 @@
   }
 
   &__doctor-name {
-    color: #808086 !important;
     font-weight: 500;
     font-size: 20px;
   }
 
   &__text {
-    color: #808086 !important;
+    color: #000 !important;
     font-weight: 400;
-    font-size: 14px;
+    margin: 0;
   }
 
   &__pain-scale {
@@ -28,6 +27,6 @@
 }
 
 .chakra-accordion__item {
-  border-top-width: 0px !important;
+  border-top-width: 0 !important;
   border-bottom-width: 1px;
 }

@@ -2,9 +2,11 @@
 
 namespace Application.Document.DTOs.RequestDTOs;
 
-public record UploadMultipleDocumentsDto(
+public record UploadMultipleDocumentsDto
+(
     List<Stream> Streams, 
     List<string> ContentTypes, 
     List<string> FileNames, 
     List<DocumentType> DocumentTypes, 
-    Guid? SessionId = null);
+    Guid? SessionId = null
+);

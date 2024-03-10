@@ -1,4 +1,5 @@
 ﻿using Application.Common.Enums;
+using Application.Military.DTOs.Request;
 
 namespace Application.User.DTOs.RequestDTOs
 {
@@ -10,6 +11,7 @@ namespace Application.User.DTOs.RequestDTOs
         string? Patronymic,
         string PhoneNumber,
         string Password,
-        RoleType Role
+        RoleType Role,
+        AddMilitaryDataDto? MilitaryData
     );
 }

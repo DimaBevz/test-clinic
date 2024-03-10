@@ -8,6 +8,7 @@ namespace Application.Common.Interfaces.Repositories
     {
         Task<AddedSessionDto> AddSessionAsync(AddSessionDto request, Guid patientId, Guid meetingId, CancellationToken cancellationToken);
         Task<GetSessionsResponseDto> GetSessionsAsync(GetSessionsRequestDto request, CancellationToken cancellationToken);
+        Task<GetPaginatedSessionsDto> GetSessionsByParamsAsync(GetSessionsByParamsDto request, CancellationToken cancellationToken);
         Task<SessionDetailsDto> GetSessionByIdAsync(Guid sessionId, CancellationToken cancellationToken);
         Task<Guid?> GetMeetingIdAsync(Guid sessionId, CancellationToken cancellationToken);
         Task<SessionDetailsDto> UpdateSessionAsync(UpdateSessionRequestDto request, CancellationToken cancellationToken);

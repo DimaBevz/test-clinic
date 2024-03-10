@@ -23,7 +23,7 @@ public class ProcessTestAnswersCommandHandler : ICommandHandler<ProcessTestAnswe
     public async ValueTask<TestProcessedDto> Handle(ProcessTestAnswersCommand command, CancellationToken cancellationToken)
     {
         var userId = new Guid(_currentUserService.UserId);
-        var result = await _testRepository.ProcessTestAsync(command.TestAnswersDto,userId, cancellationToken);
+        var result = await _testRepository.ProcessTestAsync(command.TestAnswersDto, userId, cancellationToken);
 
         if (result is null)
         {

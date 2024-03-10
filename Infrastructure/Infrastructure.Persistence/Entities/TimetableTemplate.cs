@@ -6,10 +6,13 @@ namespace Infrastructure.Persistence.Entities
     {
         [Key]
         public Guid Id { get; set; }
+
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set;}
+
         public Guid PhysicianDataId { get; set; }
         public PhysicianData PhysicianData { get; set; } = null!;
-        public IEnumerable<SessionDayTemplate> SessionDayTemplates { get; set; } = null!;
+
+        public IEnumerable<SessionTemplateDay> SessionTemplateDays { get; set; } = null!;
     }
 }

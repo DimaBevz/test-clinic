@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { CloseIcon } from "@chakra-ui/icons";
 
 import "./index.scss";
-import documentsService from "@features/Documents/documents.service.ts";
+import documentsService from "@api/documents.service";
 import { Preloader } from "@components/preloader/Preloader";
-import { useToast } from "@hooks/useToast.ts";
+import { useToast } from "@hooks/general/useToast";
 import { NoContent } from "@components/index.ts";
 
 interface IDocumentsProps {
@@ -46,7 +46,7 @@ const Documents = ( { userId, isGuest }: IDocumentsProps ) => {
 		<Box w="100%">
 			<HStack justifyContent="space-between">
 				<Heading as={ "h4" } size={ "md" }>{ t( "Documents" ) }</Heading>
-				<Button colorScheme="orange" display={isGuest ? "none" : "block"} onClick={ handleClick } size="sm">{ t( "Upload documents" ) }</Button>
+				<Button display={isGuest ? "none" : "block"} onClick={ handleClick } size="sm">{ t( "Upload documents" ) }</Button>
 				<input
 					type="file"
 					onChange={ handleChange }
@@ -59,13 +59,15 @@ const Documents = ( { userId, isGuest }: IDocumentsProps ) => {
 							pt={ 4 }>
 				{ !data?.length && <NoContent content={t("No documents yet")}/>	}
 				{ isLoading ? <Preloader size="xl"/> : data?.map( ( file ) => (
-					<Tag _hover={ { cursor: "pointer", color: "green" } } minH="40px" onClick={ () => openDocument( file.presignedUrl ) } w="100%" justifyContent="space-between">
+					<Tag fontSize="16px" _hover={ { cursor: "pointer", color: "#D69E2E" } } minH="40px" onClick={ () => openDocument( file.presignedUrl ) } w="100%" justifyContent="space-between">
 						{ file.title }
 						
 						<IconButton
 							display={isGuest ? "none" : "block"}
 							icon={<CloseIcon color="red" />}
 							aria-label="Delete"
+							bg="#EDF2F7"
+							_hover={ { bg: "#E2E8F0" } }
 							isLoading={ isDeleteLoading }
 							className="Documents__deleteButton"
 							onClick={ ( event ) => {

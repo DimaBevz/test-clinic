@@ -17,6 +17,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AWSInfrastructure", "AWSInf
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CdkForDotnetDevelopers", "AwsInfrastructure\src\CdkForDotnetDevelopers\CdkForDotnetDevelopers.csproj", "{6D863C77-0967-4450-8297-906955E25F3C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MigrationScripts", "MigrationScripts", "{27E4408A-18C4-4ED1-B8EF-217764911DEE}"
+	ProjectSection(SolutionItems) = preProject
+		Update-Database.bat = Update-Database.bat
+		Migrations-List.bat = Migrations-List.bat
+		Remove-Migration.bat = Remove-Migration.bat
+		Add-Migration.bat = Add-Migration.bat
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

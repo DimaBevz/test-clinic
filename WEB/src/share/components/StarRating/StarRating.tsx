@@ -23,7 +23,7 @@ export default function StarRating({ value, onChange }: IStarRating) {
         <Icon
           key={i}
           boxSize={6}
-          color="#DD6B20"
+          color="#ECC94B"
           _hover={onChange && {transform: "scale(1.2)"}}
           as={MdStar}
           onClick={() => handleClick(i)}
@@ -34,7 +34,7 @@ export default function StarRating({ value, onChange }: IStarRating) {
         <Icon
           boxSize={6}
           as={MdStarHalf}
-          color="#DD6B20"
+          color="#ECC94B"
         />
       )}
       

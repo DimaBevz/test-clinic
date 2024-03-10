@@ -6,4 +6,5 @@ public record GetTestDto(
     Guid Id,
     string Name,
     string Description,
-    TestType Type);
+    TestType Type,
+    bool IsPassed = false);

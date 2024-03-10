@@ -12,7 +12,8 @@ const NoContent: FunctionComponent<INoContentProps> = ({content}) => {
 			w="100%"
 			borderRadius={5}
 			borderWidth="2px"
-			borderColor="orange.200"
+			bgColor="gray.50"
+			borderColor="gray.100"
 		>
 			<Text fontSize="16px">{content}</Text>
 		</Center>

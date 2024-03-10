@@ -5,7 +5,9 @@ using Infrastructure.Persistence.Entities;
 using Infrastructure.Persistence.Mappers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Xml.Linq;
+using Application.Admin.DTOs.Request;
+using Application.Admin.DTOs.Response;
+using Application.Common.Enums;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -61,6 +63,70 @@ namespace Infrastructure.Persistence.Repositories
             return dto;
         }
 
+        public async Task<ApprovedPhysicianDto?> ApprovePhysicianAsync(ApprovePhysicianDto physicianDto, CancellationToken cancellationToken)
+        {
+            var physician =
+                await _dbContext.PhysicianData.FirstOrDefaultAsync(p => p.UserId == physicianDto.Id, cancellationToken);
+
+            if (physician is null)
+            {
+                return null;
+            }
+
+            var adminMessage =
+                await _dbContext.ApproveDocumentMessages.FirstOrDefaultAsync(m => m.PhysicianDataId == physicianDto.Id,
+                    cancellationToken);
+
+            if (adminMessage is not null)
+            {
+                _dbContext.ApproveDocumentMessages.Remove(adminMessage);
+            }
+
+            physician.IsApproved = true;
+            _dbContext.PhysicianData.Update(physician);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            var result = new ApprovedPhysicianDto(physicianDto.Id, true);
+            return result;
+        }
+
+        public async Task<DeclinedPhysicianDto?> DeclinePhysicianAsync(DeclinePhysicianDto physicianDto, CancellationToken cancellationToken)
+        {
+            var physician =
+                await _dbContext.PhysicianData.FirstOrDefaultAsync(p => p.UserId == physicianDto.Id, cancellationToken);
+
+            if (physician is null)
+            {
+                return null;
+            }
+
+            var adminMessage =
+                await _dbContext.ApproveDocumentMessages.FirstOrDefaultAsync(m => m.PhysicianDataId == physicianDto.Id,
+                    cancellationToken);
+
+            if (adminMessage is not null)
+            {
+                adminMessage.Message = physicianDto.Message;
+                _dbContext.ApproveDocumentMessages.Update(adminMessage);
+            }
+            else
+            {
+                var newAdminMessage = new ApproveDocumentMessage
+                {
+                    PhysicianDataId = physicianDto.Id,
+                    Message = physicianDto.Message
+                };
+                await _dbContext.ApproveDocumentMessages.AddAsync(newAdminMessage, cancellationToken);
+            }
+
+            physician.IsApproved = false;
+            _dbContext.PhysicianData.Update(physician);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            var result = new DeclinedPhysicianDto(physicianDto.Id, false, physicianDto.Message);
+            return result;
+        }
+
         public async Task<GetPhysiciansDto> GetPhysiciansAsync()
         {
             var physicianDtoItems = await _dbContext.PhysicianData
@@ -68,6 +134,7 @@ namespace Infrastructure.Persistence.Repositories
                 .Include(p => p.Comments)
                 .Include(p => p.User)
                 .ThenInclude(u => u!.UserPhotoData)
+                .Where(p => p.IsApproved)
                 .Select(p => p.ToItemDto())
                 .ToListAsync();
 
@@ -75,9 +142,31 @@ namespace Infrastructure.Persistence.Repositories
             return dto;
         }
 
+        public async Task<GetUnapprovedPhysiciansDto> GetAllUnapprovedPhysiciansAsync(CancellationToken cancellationToken)
+        {
+            var unapprovedPhysicians = await _dbContext.PhysicianData
+                .Include(p => p.User)
+                .ThenInclude(u => u.Documents)
+                .Include(u => u.User)
+                .ThenInclude(u => u.UserPhotoData)
+                .Include(p => p.ApproveDocumentMessage)
+                .Where(p => !p.IsApproved)
+                .Select(p => new GetPhysicianItemDto(p.UserId, p.User.LastName, p.User.FirstName, p.User.Patronymic,
+                    p.User.UserPhotoData.PresignedUrl ?? "",
+                    p.User.Documents.Count(d =>
+                        d.Type == DocumentType.Certificate || d.Type == DocumentType.License ||
+                        d.Type == DocumentType.Diploma),
+                    p.ApproveDocumentMessage.Message ?? ""))
+                .ToListAsync(cancellationToken);
+
+            var result = new GetUnapprovedPhysiciansDto(unapprovedPhysicians);
+
+            return result;
+        }
+
         public async Task<GetPaginatedPhysiciansDto<PhysicianItemDto>> GetPhysiciansAsync(GetPhysiciansByParamsDto paramsDto)
         {
-            var (page, limit, isAscending, isApproved, physicianName, positionId, sortField) = paramsDto;
+            var (page, limit, isAscending, isApproved, searchValue, sortField, sex, rating, experience) = paramsDto;
 
             var query = _dbContext.PhysicianData
                 .Include(p => p.Positions)
@@ -91,19 +180,54 @@ namespace Infrastructure.Persistence.Repositories
                 query = query.Where(pd => pd.IsApproved == isApproved);
             }
 
-            if (positionId is not null)
+            if (sex is not null && sex.Count > 0)
             {
-                var position = await _dbContext.Positions.SingleAsync(p => p.Id == positionId);
-                query = query.Where(pd => pd.Positions!.Contains(position));
+                var selectedGenders = sex.Select(s => Enum.GetName(s)).ToList();
+                query = query.Where(pd => selectedGenders.Contains(pd.User!.Sex));
             }
 
-            if (physicianName is not null)
+            if (experience.HasValue && experience.Value != 0)
+            {
+                var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+
+                query = query.Where(pd =>
+                    pd.Experience.HasValue &&
+                    (currentDate.Year - pd.Experience.Value.Year - 
+                    (currentDate.Month < pd.Experience.Value.Month 
+                    || (currentDate.Month == pd.Experience.Value.Month && currentDate.Day < pd.Experience.Value.Day) ? 1 : 0)
+                    ) >= experience.Value);
+            }
+
+            if (rating is not null && rating.Count > 0)
+            {
+                foreach (var r in rating)
+                {
+                    switch (r)
+                    {
+                        case EvaluationType.None:
+                            query = query.Where(pd => pd.Rating == 0);
+                            break;
+                        case EvaluationType.Normally:
+                            query = query.Where(pd => pd.Rating >= 3 && pd.Rating < 4);
+                            break;
+                        case EvaluationType.Good:
+                            query = query.Where(pd => pd.Rating >= 4 && pd.Rating < 4.7);
+                            break;
+                        case EvaluationType.VeryGood:
+                            query = query.Where(pd => pd.Rating >= 4.7);
+                            break;
+                    }
+                }
+            }
+
+            if (searchValue is not null)
             {
                 query = query
                 .Where(p => 
-                    EF.Functions.Like(p.User!.FirstName, $"%{physicianName}%") ||
-                    EF.Functions.Like(p.User.LastName, $"%{physicianName}%") ||
-                    EF.Functions.Like(p.User.Patronymic, $"%{physicianName}%")
+                    EF.Functions.Like(p.User!.FirstName, $"%{searchValue}%") ||
+                    EF.Functions.Like(p.User.LastName, $"%{searchValue}%") ||
+                    EF.Functions.Like(p.User.Patronymic, $"%{searchValue}%") ||
+                    p.PhysicianSpecialties.Where(s => EF.Functions.Like(s.Position.Specialty, $"%{searchValue}%")).Any()
                 );
             }
 
@@ -131,13 +255,15 @@ namespace Infrastructure.Persistence.Repositories
                 }
             }
 
-            var physicianItemDtos = await query
+            var totalCount = await query.CountAsync();
+
+            query = query
                 .Skip(limit * (page - 1))
-                .Take(limit)
+                .Take(limit);
+
+            var physicianItemDtos = await query
                 .Select(pd => pd.ToItemDto())
                 .ToListAsync();
-
-            var totalCount = await _dbContext.PhysicianData.CountAsync();
 
             var getPhysiciansDto = new GetPaginatedPhysiciansDto<PhysicianItemDto> 
             {

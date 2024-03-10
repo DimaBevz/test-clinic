@@ -36,12 +36,12 @@ namespace Infrastructure.Services
 
         public async Task<FileDataDto> UpdatePresignedLinkAsync(string fileObjectKey)
         {
-            var linkTimeExparation = DateTime.UtcNow.AddDays(1);
-            var presignedLink = await GetPresignedFileLinkAsync(fileObjectKey, linkTimeExparation);
+            var linkTimeExpiration = DateTime.UtcNow.AddDays(1);
+            var presignedLink = await GetPresignedFileLinkAsync(fileObjectKey, linkTimeExpiration);
 
             var fileDataDto = new FileDataDto
             {
-                ExpiresAt = linkTimeExparation,
+                ExpiresAt = linkTimeExpiration,
                 PresignedUrl = presignedLink
             };
 

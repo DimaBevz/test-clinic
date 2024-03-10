@@ -19,6 +19,7 @@ namespace Infrastructure.Persistence.EntityConfigurations
             builder.Property(u => u.Birthday).HasColumnName("birthday");
             builder.Property(u => u.Sex).HasColumnName("sex");
             builder.Property(u => u.Role).HasColumnName("role");
+            builder.Property(u => u.IsBanned).HasColumnName("is_banned");
         }
     }
 }
